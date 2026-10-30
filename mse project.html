@@ -1,0 +1,4041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TIRED STEEL - Why a Shaft Breaks Below Its Strength</title>
+  <meta name="description" content="Student engineering lab investigation on the fatigue failure of a rotating shaft under fully reversed bending. Subject: Introduction to Material Science and Engineering (ME2304L), SY Mechanical Div A.">
+  
+  <!-- Favicon: Inline SVG Engineering Gear -->
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23FBFAF6'/%3E%3Ccircle cx='16' cy='16' r='14' fill='none' stroke='%231F2328' stroke-width='2'/%3E%3Cpath d='M14 2 h4 v4 h-4 z M14 26 h4 v4 h-4 z M2 14 h4 v4 h-4 z M26 14 h4 v4 h-4 z M6 6 l3 3 l-2 2 l-3 -3 z M23 23 l3 3 l-2 2 l-3 -3 z M23 9 l3 -3 l2 2 l-3 3 z M6 26 l3 -3 l2 2 l-3 3 z' fill='%23F26B21' stroke='%231F2328' stroke-width='1'/%3E%3Ccircle cx='16' cy='16' r='7' fill='%23FBFAF6' stroke='%231F2328' stroke-width='2'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%232B5C8A'/%3E%3Crect x='15' y='11' width='2' height='3' fill='%231F2328'/%3E%3C/svg%3E">
+
+  <!-- The only external resource allowed: Google Fonts (with offline system fallbacks) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Barlow:wght@400;500&family=Overpass+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================================
+       ENGINEERING DRAWING SHEET DESIGN SYSTEM
+       Aesthetics: Light theme, paper #FBFAF6, 8px grid, flat graphite panels
+       Meaningful colors: Orange (#F26B21) = tension/danger, Blue (#2B5C8A) = compression/safe
+       ========================================================================== */
+    :root {
+      --bg-paper: #FBFAF6;
+      --panel-bg: #FFFFFF;
+      --graphite: #1F2328;
+      --graphite-light: #D5D8DE;
+      --graphite-dim: #8C95A0;
+      --secondary: #6B7380;
+      
+      --safety-orange: #F26B21;
+      --steel-blue: #2B5C8A;
+      --hazard-yellow: #FFD23F;
+      --safe-green: #2E7D32;
+      --warn-amber: #D97706;
+      --fail-red: #DC2626;
+
+      --font-heading: 'Barlow Condensed', 'Arial Narrow', sans-serif;
+      --font-body: 'Barlow', Arial, sans-serif;
+      --font-mono: 'Overpass Mono', monospace;
+    }
+
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      background-color: var(--bg-paper);
+      color: var(--graphite);
+      font-family: var(--font-body);
+      font-size: 15px;
+      line-height: 1.45;
+    }
+
+    body {
+      background-color: var(--bg-paper);
+      background-image: 
+        linear-gradient(to right, rgba(31, 35, 40, 0.04) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(31, 35, 40, 0.04) 1px, transparent 1px);
+      background-size: 8px 8px;
+      min-height: 100vh;
+      overflow-x: hidden;
+      position: relative;
+    }
+
+    /* TYPOGRAPHY */
+    h1, h2, h3, h4, .sheet-title {
+      font-family: var(--font-heading);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--graphite);
+    }
+    .mono {
+      font-family: var(--font-mono);
+    }
+
+    /* TOP SLIM TITLE-BLOCK BAR */
+    #top-title-bar {
+      width: 100%;
+      background: var(--panel-bg);
+      border-bottom: 2px solid var(--graphite);
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: space-between;
+      align-items: center;
+      padding: 6px 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--graphite);
+      letter-spacing: 0.5px;
+      z-index: 100;
+    }
+    .title-bar-item {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      padding: 2px 8px;
+    }
+    .title-bar-item strong {
+      color: var(--graphite);
+      font-weight: 600;
+    }
+    .title-bar-badge {
+      background: var(--graphite);
+      color: #FFF;
+      padding: 1px 6px;
+      font-size: 10px;
+      border-radius: 2px;
+    }
+
+    /* STICKY NAVIGATION BAR */
+    #sticky-nav {
+      position: sticky;
+      top: 0;
+      background: #FFFFFF;
+      border-bottom: 1.5px solid var(--graphite);
+      display: flex;
+      overflow-x: auto;
+      z-index: 99;
+      box-shadow: none;
+    }
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 18px;
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      color: var(--secondary);
+      border-right: 1px solid var(--graphite-light);
+      white-space: nowrap;
+      transition: background 0.15s, color 0.15s;
+    }
+    .nav-link:hover {
+      background: #F4F3ED;
+      color: var(--graphite);
+    }
+    .nav-link.active {
+      color: var(--graphite);
+      background: #FDF9EE;
+      border-bottom: 3px solid var(--safety-orange);
+    }
+    .nav-link span.num {
+      color: var(--steel-blue);
+      font-family: var(--font-mono);
+      font-size: 12px;
+    }
+
+    /* MAIN CONTAINER */
+    .sheet-container {
+      max-width: 1320px;
+      margin: 0 auto;
+      padding: 24px 20px 60px 20px;
+    }
+
+    /* SHEET SECTIONS */
+    .sheet {
+      background: transparent;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    /* SHEET HEADER & DIMENSION LINE */
+    .sheet-header {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      margin-bottom: 16px;
+      border-bottom: 1px solid var(--graphite);
+      padding-bottom: 8px;
+    }
+    .sheet-header-title {
+      font-family: var(--font-heading);
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      color: var(--graphite);
+    }
+    .sheet-header-title span.sheet-num {
+      color: var(--safety-orange);
+      margin-right: 4px;
+    }
+    .dim-line {
+      display: flex;
+      align-items: center;
+      flex-grow: 1;
+      gap: 4px;
+      color: var(--steel-blue);
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .dim-line .dim-rule {
+      flex-grow: 1;
+      height: 1px;
+      background: var(--steel-blue);
+      position: relative;
+    }
+    .dim-line .dim-arrow {
+      font-size: 9px;
+      color: var(--steel-blue);
+      line-height: 1;
+    }
+    .dim-label {
+      padding: 0 8px;
+      text-transform: uppercase;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+    }
+
+    /* PANELS */
+    .panel {
+      background: var(--panel-bg);
+      border: 1px solid var(--graphite);
+      border-radius: 2px;
+      position: relative;
+      padding: 16px;
+      margin-bottom: 16px;
+    }
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--graphite-light);
+      padding-bottom: 8px;
+      margin-bottom: 12px;
+    }
+    .panel-title {
+      font-family: var(--font-heading);
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--graphite);
+    }
+    .panel-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--secondary);
+      border: 1px solid var(--graphite-light);
+      padding: 1px 6px;
+      border-radius: 2px;
+      text-transform: uppercase;
+    }
+
+    /* CORNER CROSSHAIR REGISTRATION MARKS */
+    .crosshair-corner {
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      pointer-events: none;
+      z-index: 2;
+    }
+    .crosshair-corner::before {
+      content: '+';
+      position: absolute;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      line-height: 1;
+      color: var(--graphite-dim);
+    }
+    .ch-tl { top: 2px; left: 3px; }
+    .ch-tr { top: 2px; right: 8px; }
+    .ch-bl { bottom: 8px; left: 3px; }
+    .ch-br { bottom: 8px; right: 8px; }
+
+    /* HAZARD STRIPE DIVIDER */
+    .hazard-stripe {
+      height: 8px;
+      width: 100%;
+      background: repeating-linear-gradient(
+        -45deg,
+        var(--hazard-yellow),
+        var(--hazard-yellow) 8px,
+        var(--graphite) 8px,
+        var(--graphite) 16px
+      );
+      border-top: 1px solid var(--graphite);
+      border-bottom: 1px solid var(--graphite);
+      margin: 32px 0;
+    }
+
+    /* DRAWN BY TEAM STRIP (4-column) */
+    .team-strip {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--graphite);
+      border-radius: 2px;
+      padding: 10px 14px;
+      margin-bottom: 16px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .team-col {
+      border-right: 1px solid var(--graphite-light);
+      padding-right: 8px;
+    }
+    .team-col:last-child {
+      border-right: none;
+      padding-right: 0;
+    }
+    .team-role {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: var(--steel-blue);
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      margin-bottom: 2px;
+    }
+    .team-name {
+      font-weight: 600;
+      color: var(--graphite);
+      font-size: 11.5px;
+    }
+    .team-prn {
+      color: var(--secondary);
+      font-size: 10px;
+    }
+
+    /* BUTTONS */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 7px 14px;
+      font-family: var(--font-heading);
+      font-size: 13.5px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      border: 1.5px solid var(--graphite);
+      border-radius: 2px;
+      background: #FFFFFF;
+      color: var(--graphite);
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+      white-space: nowrap;
+    }
+    .btn:hover {
+      background: #F4F3ED;
+    }
+    .btn:active {
+      transform: translateY(1px);
+    }
+    .btn-primary {
+      background: var(--safety-orange);
+      color: #FFFFFF;
+      border-color: var(--graphite);
+    }
+    .btn-primary:hover {
+      background: #DF5910;
+    }
+    .btn-secondary {
+      background: #FFFFFF;
+      color: var(--steel-blue);
+      border-color: var(--steel-blue);
+    }
+    .btn-secondary:hover {
+      background: #EEF4F9;
+    }
+
+    /* SQUARE HINT '?' BUTTON & POPOVER */
+    .hint-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      font-family: var(--font-mono);
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--graphite);
+      background: #F4F3ED;
+      border: 1px solid var(--graphite);
+      border-radius: 2px;
+      cursor: pointer;
+      margin-left: 4px;
+      vertical-align: middle;
+      line-height: 1;
+      padding: 0;
+      transition: background 0.15s;
+    }
+    .hint-btn:hover, .hint-btn:focus-visible {
+      background: var(--hazard-yellow);
+      outline: none;
+    }
+    .popover-container {
+      position: relative;
+      display: inline-block;
+    }
+    .popover-box {
+      display: none;
+      position: absolute;
+      bottom: calc(100% + 6px);
+      left: 50%;
+      transform: translateX(-50%);
+      width: 250px;
+      background: #FFFFFF;
+      border: 1.5px solid var(--graphite);
+      border-radius: 2px;
+      padding: 6px 10px;
+      font-family: var(--font-body);
+      font-size: 11.5px;
+      color: var(--graphite);
+      line-height: 1.35;
+      z-index: 200;
+      pointer-events: auto;
+      text-align: left;
+      white-space: normal;
+    }
+    .popover-box.visible {
+      display: block;
+    }
+
+    /* JOKE BOX (Max 1 per sheet) */
+    .sheet-joke {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 12px;
+      color: var(--secondary);
+      border-left: 3px solid var(--steel-blue);
+      padding: 4px 10px;
+      margin: 10px 0;
+      background: rgba(43, 92, 138, 0.04);
+    }
+    .sheet-joke strong {
+      font-family: var(--font-mono);
+      font-style: normal;
+      color: var(--steel-blue);
+      font-size: 11px;
+    }
+
+    /* ==========================================================================
+       SHEET 01: PROBLEM
+       ========================================================================== */
+    .problem-hero-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.8fr;
+      gap: 16px;
+    }
+    .problem-lead-box {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .lead-sentence {
+      font-size: 17px;
+      font-weight: 500;
+      color: var(--graphite);
+      line-height: 1.4;
+      border-left: 3px solid var(--safety-orange);
+      padding-left: 10px;
+    }
+    .obj-sentence {
+      font-size: 14px;
+      color: var(--steel-blue);
+      font-weight: 600;
+      font-family: var(--font-mono);
+      margin-top: 4px;
+    }
+    .fatigue-def-lines {
+      margin-top: 10px;
+      font-size: 13px;
+      color: #333;
+      line-height: 1.45;
+    }
+
+    /* Paperclip Hook Widget */
+    .paperclip-card {
+      background: #FFFFFF;
+      border: 1px solid var(--graphite);
+      padding: 12px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    #paperclip-svg {
+      width: 100%;
+      height: 110px;
+    }
+    .clip-controls {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      align-items: center;
+    }
+    .clip-status {
+      font-family: var(--font-mono);
+      font-size: 11px;
+      margin-top: 6px;
+    }
+
+    /* 3-Step Strip */
+    .three-step-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 14px;
+    }
+    .step-box {
+      border: 1px solid var(--graphite-light);
+      background: #FFFFFF;
+      padding: 10px;
+      text-align: center;
+    }
+    .step-box svg {
+      width: 100%;
+      height: 70px;
+    }
+    .step-header {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 14px;
+      color: var(--graphite);
+      margin-bottom: 4px;
+    }
+    .step-caption {
+      font-size: 11px;
+      color: var(--secondary);
+      font-family: var(--font-mono);
+      text-transform: uppercase;
+    }
+
+    /* Real Cases Timeline */
+    .cases-timeline {
+      margin-top: 16px;
+      border-top: 1px solid var(--graphite-light);
+      padding-top: 12px;
+    }
+    .timeline-item {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      padding: 5px 0;
+      font-size: 12.5px;
+      border-bottom: 1px dashed var(--graphite-light);
+    }
+    .timeline-item:last-child { border-bottom: none; }
+    .timeline-year {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--safety-orange);
+      min-width: 48px;
+    }
+    .timeline-case {
+      font-weight: 600;
+      color: var(--graphite);
+    }
+    .timeline-desc {
+      color: var(--secondary);
+    }
+
+    /* ==========================================================================
+       SHEET 02: MATERIAL
+       ========================================================================== */
+    .material-grid {
+      display: grid;
+      grid-template-columns: 1.4fr 1fr;
+      gap: 16px;
+    }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 12px;
+      text-align: left;
+    }
+    .data-table th, .data-table td {
+      border: 1px solid var(--graphite-light);
+      padding: 6px 10px;
+    }
+    .data-table th {
+      background: #F4F3ED;
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--graphite);
+      letter-spacing: 0.5px;
+    }
+    .data-table td.mono-cell {
+      font-family: var(--font-mono);
+    }
+
+    .sketches-box {
+      display: flex;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .sn-sketch-card {
+      flex: 1;
+      border: 1px solid var(--graphite-light);
+      padding: 8px;
+      background: #FFF;
+      text-align: center;
+    }
+    .sn-sketch-card svg {
+      width: 100%;
+      height: 75px;
+    }
+
+    /* Factors Chips */
+    .factors-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 12px;
+    }
+    .factor-chip {
+      border: 1px solid var(--graphite);
+      background: #FFF;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 6px;
+      transition: background 0.3s, border-color 0.3s;
+    }
+    .factor-name {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 12px;
+      color: var(--graphite);
+      text-transform: uppercase;
+    }
+    .factor-desc {
+      font-size: 11px;
+      color: var(--secondary);
+    }
+    .factor-tag {
+      font-family: var(--font-mono);
+      font-size: 10px;
+      color: var(--steel-blue);
+      cursor: pointer;
+      text-decoration: underline;
+      align-self: flex-start;
+    }
+    .factor-tag:hover {
+      color: var(--safety-orange);
+    }
+
+    /* Assumptions Box */
+    .assumptions-box {
+      border: 1px dashed var(--graphite);
+      padding: 8px 12px;
+      background: #FDFDFB;
+      margin-top: 12px;
+      font-size: 11.5px;
+      color: #333;
+    }
+    .assumptions-box ul {
+      padding-left: 18px;
+      margin-top: 4px;
+    }
+
+    /* Highlight ring effect for factor chips */
+    @keyframes pulse-control {
+      0% { outline: 3px solid var(--safety-orange); }
+      50% { outline: 3px solid var(--hazard-yellow); }
+      100% { outline: 3px solid transparent; }
+    }
+    .control-highlighted {
+      animation: pulse-control 0.5s ease-in-out 3;
+    }
+
+    /* ==========================================================================
+       SHEET 03: SHAFT LAB (HERO SIMULATION)
+       ========================================================================== */
+    .lab-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+    }
+    .lab-left {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .lab-right {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    /* Canvas Containers */
+    .canvas-card {
+      background: #FFFFFF;
+      border: 1px solid var(--graphite);
+      border-radius: 2px;
+      padding: 10px;
+      position: relative;
+    }
+    .canvas-title-bar {
+      display: flex;
+      justify-content: space-between;
+      font-family: var(--font-mono);
+      font-size: 10.5px;
+      color: var(--secondary);
+      border-bottom: 1px solid var(--graphite-light);
+      padding-bottom: 4px;
+      margin-bottom: 6px;
+    }
+
+    #canvas-shaft-side {
+      width: 100%;
+      height: 160px;
+      display: block;
+    }
+
+    .dual-viz-row {
+      display: grid;
+      grid-template-columns: 1fr 1.3fr;
+      gap: 10px;
+    }
+    #canvas-cross-section {
+      width: 100%;
+      height: 140px;
+      display: block;
+    }
+    #canvas-stress-wave {
+      width: 100%;
+      height: 140px;
+      display: block;
+    }
+
+    /* Rubber stamp overlay */
+    .stamp-overlay {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) rotate(-12deg);
+      padding: 8px 18px;
+      font-family: var(--font-heading);
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      border: 3.5px dashed;
+      border-radius: 4px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 10;
+      background: rgba(255, 255, 255, 0.85);
+    }
+    .stamp-failed {
+      color: var(--safety-orange);
+      border-color: var(--safety-orange);
+    }
+    .stamp-runout {
+      color: var(--steel-blue);
+      border-color: var(--steel-blue);
+    }
+    .stamp-visible {
+      opacity: 1;
+      transform: translate(-50%, -50%) rotate(-12deg) scale(1.05);
+    }
+
+    /* S-N Chart & Gauges */
+    #canvas-sn-chart {
+      width: 100%;
+      height: 160px;
+      display: block;
+    }
+
+    .gauges-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    #canvas-dial-gauge {
+      width: 100%;
+      height: 110px;
+      display: block;
+    }
+
+    /* Odometer Counter */
+    .odometer-box {
+      background: var(--graphite);
+      border: 1.5px solid var(--graphite);
+      padding: 8px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      border-radius: 2px;
+    }
+    .odometer-label {
+      font-family: var(--font-mono);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #A0AEC0;
+      margin-bottom: 4px;
+    }
+    .odometer-digits {
+      font-family: var(--font-mono);
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: 3px;
+      color: #FFFFFF;
+      background: #111418;
+      padding: 3px 10px;
+      border: 1px solid #333;
+      border-radius: 2px;
+      text-shadow: 0 0 1px #FFF;
+    }
+
+    /* Status LED Bar */
+    .status-led-bar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      background: #F4F3ED;
+      border: 1px solid var(--graphite-light);
+      padding: 6px 10px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+    }
+    .led-bulb {
+      width: 12px;
+      height: 12px;
+      border: 1.5px solid var(--graphite);
+      border-radius: 2px;
+      background: var(--safe-green);
+      transition: background 0.2s;
+    }
+
+    /* Controls Panel */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px 12px;
+      font-size: 11.5px;
+    }
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .control-label {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 11px;
+      color: var(--graphite);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .control-val {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      color: var(--steel-blue);
+      font-size: 11px;
+    }
+    select.input-select {
+      background: #FFFFFF;
+      border: 1px solid var(--graphite);
+      border-radius: 2px;
+      padding: 4px 6px;
+      font-family: var(--font-body);
+      font-size: 11px;
+      color: var(--graphite);
+      cursor: pointer;
+    }
+    input[type=range].slider-square {
+      -webkit-appearance: none;
+      width: 100%;
+      height: 6px;
+      background: var(--graphite-light);
+      border: 1px solid var(--graphite);
+      border-radius: 0;
+      outline: none;
+      margin: 4px 0;
+    }
+    input[type=range].slider-square::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 14px;
+      height: 14px;
+      background: var(--steel-blue);
+      border: 1px solid var(--graphite);
+      border-radius: 0;
+      cursor: pointer;
+    }
+    input[type=range].slider-square::-moz-range-thumb {
+      width: 14px;
+      height: 14px;
+      background: var(--steel-blue);
+      border: 1px solid var(--graphite);
+      border-radius: 0;
+      cursor: pointer;
+    }
+
+    /* Readouts Grid */
+    .readouts-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .readout-box {
+      border: 1px solid var(--graphite-light);
+      background: #FFF;
+      padding: 6px 8px;
+    }
+    .readout-label {
+      font-size: 10px;
+      color: var(--secondary);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .readout-value {
+      font-family: var(--font-mono);
+      font-size: 13.5px;
+      font-weight: 700;
+      color: var(--graphite);
+      margin-top: 2px;
+    }
+    .readout-unit {
+      font-size: 9.5px;
+      font-variant: small-caps;
+      color: var(--secondary);
+      margin-left: 2px;
+    }
+
+    /* Action Buttons Row */
+    .action-btn-row {
+      display: flex;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    /* LIVE CALCULATION STRIP (Chain of Formulae) */
+    .calc-strip-title {
+      font-family: var(--font-heading);
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--steel-blue);
+      margin: 14px 0 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .calc-chain {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 8px;
+    }
+    .calc-step-box {
+      background: #FFFFFF;
+      border: 1px solid var(--graphite);
+      border-radius: 2px;
+      padding: 6px 8px;
+      font-size: 10.5px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .calc-step-head {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--steel-blue);
+      font-size: 11px;
+      border-bottom: 1px solid var(--graphite-light);
+      padding-bottom: 2px;
+      margin-bottom: 3px;
+    }
+    .calc-step-formula {
+      font-family: var(--font-mono);
+      color: var(--secondary);
+      font-size: 9.5px;
+    }
+    .calc-step-subst {
+      font-family: var(--font-mono);
+      color: var(--graphite);
+      font-size: 10px;
+      margin-top: 3px;
+    }
+    .calc-step-res {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--safety-orange);
+      font-size: 12px;
+      margin-top: 2px;
+    }
+
+    /* ==========================================================================
+       SHEET 04: CRACK GROWTH LAB
+       ========================================================================== */
+    .crack-layout {
+      display: grid;
+      grid-template-columns: 1.15fr 0.85fr;
+      gap: 16px;
+    }
+    #canvas-crack-front {
+      width: 100%;
+      height: 260px;
+      display: block;
+    }
+    #canvas-crack-chart {
+      width: 100%;
+      height: 180px;
+      display: block;
+    }
+    .crack-sync-banner {
+      background: #EEF4F9;
+      border: 1px solid var(--steel-blue);
+      padding: 6px 12px;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      color: var(--steel-blue);
+      margin-bottom: 10px;
+    }
+    .crack-readouts-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 8px;
+    }
+    .crack-legend {
+      border-top: 1px solid var(--graphite-light);
+      padding-top: 10px;
+      margin-top: 12px;
+      font-size: 11.5px;
+      color: var(--graphite);
+    }
+    .crack-legend-item {
+      margin-bottom: 4px;
+    }
+    .crack-legend-item strong {
+      font-family: var(--font-heading);
+      color: var(--graphite);
+    }
+
+    /* ==========================================================================
+       SHEET 05: FINDINGS (COMPUTED BAR CHART)
+       ========================================================================== */
+    .findings-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .findings-chart {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+    .bar-row {
+      display: grid;
+      grid-template-columns: 180px 1fr 140px 70px;
+      align-items: center;
+      gap: 10px;
+      font-size: 11.5px;
+    }
+    .bar-label {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--graphite);
+      font-size: 12px;
+    }
+    .bar-track {
+      background: #EFEFEA;
+      height: 22px;
+      border: 1px solid var(--graphite-light);
+      position: relative;
+      overflow: hidden;
+    }
+    .bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--steel-blue);
+      transition: width 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .bar-fill.bar-runout {
+      background: var(--safe-green);
+    }
+    .bar-value {
+      font-family: var(--font-mono);
+      font-weight: 600;
+      font-size: 11px;
+      color: var(--graphite);
+    }
+    .bar-cost {
+      font-family: var(--font-mono);
+      color: var(--safety-orange);
+      font-weight: 700;
+      font-size: 11px;
+    }
+
+    .auto-insights-box {
+      border: 1px solid var(--steel-blue);
+      background: #F8FBFE;
+      padding: 10px 14px;
+      margin-bottom: 14px;
+      font-size: 12.5px;
+      line-height: 1.45;
+    }
+    .auto-insights-box p {
+      margin-bottom: 4px;
+    }
+    .auto-insights-box p:last-child { margin-bottom: 0; }
+    .auto-insights-box strong {
+      color: var(--steel-blue);
+    }
+
+    .rules-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+    .rule-item {
+      border: 1px solid var(--graphite-light);
+      padding: 8px 10px;
+      background: #FFF;
+      font-size: 11.5px;
+    }
+    .rule-num {
+      font-family: var(--font-mono);
+      font-weight: 700;
+      color: var(--safety-orange);
+      margin-right: 4px;
+    }
+
+    /* ==========================================================================
+       SHEET 06: APPLICATIONS & FOOTER TITLE BLOCK
+       ========================================================================== */
+    .ndt-strip {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .ndt-item {
+      border: 1px solid var(--graphite);
+      padding: 8px 10px;
+      background: #FFF;
+      font-size: 11.5px;
+    }
+    .ndt-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      color: var(--steel-blue);
+      font-size: 12px;
+      margin-bottom: 2px;
+    }
+
+    .conclusions-box {
+      border-left: 3px solid var(--safety-orange);
+      padding: 8px 12px;
+      background: #FFF;
+      margin-bottom: 14px;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .sources-box {
+      font-size: 11px;
+      color: var(--secondary);
+      font-family: var(--font-mono);
+      line-height: 1.5;
+      margin-bottom: 20px;
+    }
+
+    /* AUTHENTIC TITLE-BLOCK TABLE FOOTER */
+    .title-block-footer {
+      width: 100%;
+      border: 2px solid var(--graphite);
+      background: #FFFFFF;
+      font-family: var(--font-mono);
+      font-size: 11px;
+      border-collapse: collapse;
+      margin-top: 24px;
+    }
+    .title-block-footer td {
+      border: 1px solid var(--graphite);
+      padding: 6px 10px;
+      vertical-align: top;
+    }
+    .tb-header-cell {
+      background: #F4F3ED;
+      font-size: 9px;
+      text-transform: uppercase;
+      color: var(--secondary);
+      letter-spacing: 0.5px;
+    }
+    .tb-val {
+      font-weight: 600;
+      color: var(--graphite);
+      margin-top: 2px;
+    }
+
+    /* RESPONSIVE BREAKPOINTS */
+    @media (max-width: 1024px) {
+      .lab-layout, .crack-layout, .problem-hero-grid, .material-grid {
+        grid-template-columns: 1fr;
+      }
+      .team-strip {
+        grid-template-columns: repeat(2, 1fr);
+      }
+      .calc-chain {
+        grid-template-columns: repeat(3, 1fr);
+      }
+      .factors-grid, .rules-grid, .ndt-strip {
+        grid-template-columns: 1fr;
+      }
+    }
+    @media (max-width: 600px) {
+      .team-strip {
+        grid-template-columns: 1fr;
+      }
+      .calc-chain {
+        grid-template-columns: 1fr 1fr;
+      }
+      .dual-viz-row, .gauges-row {
+        grid-template-columns: 1fr;
+      }
+      .bar-row {
+        grid-template-columns: 110px 1fr 60px;
+      }
+      .bar-cost { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- TOP TITLE-BLOCK SLIM BAR -->
+  <header id="top-title-bar">
+    <div class="title-bar-item">
+      <span>PROJECT:</span>
+      <strong>TIRED STEEL &mdash; FATIGUE FAILURE OF A ROTATING SHAFT</strong>
+    </div>
+    <div class="title-bar-item">
+      <span>SUBJECT:</span>
+      <strong>INTRODUCTION TO MATERIAL SCIENCE AND ENGINEERING</strong>
+    </div>
+    <div class="title-bar-item">
+      <span>COURSE:</span>
+      <strong>ME2304L (DIV A)</strong>
+    </div>
+    <div class="title-bar-item">
+      <span>GROUP:</span>
+      <strong class="title-bar-badge">03</strong>
+    </div>
+    <div class="title-bar-item">
+      <span>SCALE:</span>
+      <strong>NTS</strong>
+    </div>
+    <div class="title-bar-item">
+      <span>STATUS:</span>
+      <strong style="color:var(--steel-blue);">SUBMITTED LAB</strong>
+    </div>
+  </header>
+
+  <!-- STICKY 6-LINK NAVIGATION -->
+  <nav id="sticky-nav" aria-label="Drawing Sheets">
+    <a href="#sheet-problem" class="nav-link active"><span class="num">01.</span> PROBLEM</a>
+    <a href="#sheet-material" class="nav-link"><span class="num">02.</span> MATERIAL</a>
+    <a href="#sheet-lab" class="nav-link"><span class="num">03.</span> SHAFT LAB</a>
+    <a href="#sheet-crack" class="nav-link"><span class="num">04.</span> CRACK GROWTH</a>
+    <a href="#sheet-findings" class="nav-link"><span class="num">05.</span> FINDINGS</a>
+    <a href="#sheet-applications" class="nav-link"><span class="num">06.</span> APPLICATIONS</a>
+  </nav>
+
+  <main class="sheet-container">
+
+    <!-- ====================================================================
+         SHEET 01: PROBLEM
+         ==================================================================== -->
+    <section id="sheet-problem" class="sheet">
+      <!-- 4-Column DRAWN BY Team Strip with Course & Subject Info -->
+      <div style="background:#FFFFFF;border:1.5px solid var(--graphite);border-bottom:none;border-radius:2px 2px 0 0;padding:6px 14px;font-family:var(--font-mono);font-size:10.5px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;align-items:center;">
+        <div><span>SUBJECT: </span><strong>INTRODUCTION TO MATERIAL SCIENCE AND ENGINEERING</strong> (ME2304L)</div>
+        <div style="color:var(--secondary);">COURSE COORDINATOR: <strong>DR. SAGAR DHAGE</strong> &bull; SY MECH DIV A</div>
+      </div>
+      <div class="team-strip" style="border-radius:0 0 2px 2px;margin-top:0;" aria-label="Project Team">
+        <div class="team-col">
+          <div class="team-role">DRAWN BY &bull; 01</div>
+          <div class="team-name">Yash Sharad Chaudhari</div>
+          <div class="team-prn">PRN: RBT25ME008</div>
+        </div>
+        <div class="team-col">
+          <div class="team-role">DRAWN BY &bull; 02</div>
+          <div class="team-name">Shubham Sunil Chavan</div>
+          <div class="team-prn">PRN: RBT25ME009</div>
+        </div>
+        <div class="team-col">
+          <div class="team-role">DRAWN BY &bull; 03</div>
+          <div class="team-name">Kedar Yogesh Chidrewar</div>
+          <div class="team-prn">PRN: RBT25ME010</div>
+        </div>
+        <div class="team-col">
+          <div class="team-role">DRAWN BY &bull; 04</div>
+          <div class="team-name">Maithili Swatej Deshmukh</div>
+          <div class="team-prn">PRN: RBT25ME012</div>
+        </div>
+      </div>
+
+      <div class="sheet-header">
+        <h1 class="sheet-header-title"><span class="sheet-num">01 /</span> PROBLEM STATEMENT</h1>
+        <div class="dim-line">
+          <span class="dim-arrow">◀</span>
+          <span class="dim-rule"></span>
+          <span class="dim-label">FATIGUE INITIATION &bull; SCALE: NTS</span>
+          <span class="dim-rule"></span>
+          <span class="dim-arrow">▶</span>
+        </div>
+      </div>
+
+      <div class="panel crosshair">
+        <div class="crosshair-corner ch-tl"></div>
+        <div class="crosshair-corner ch-tr"></div>
+        <div class="crosshair-corner ch-bl"></div>
+        <div class="crosshair-corner ch-br"></div>
+
+        <div class="problem-hero-grid">
+          <div class="problem-lead-box">
+            <p class="lead-sentence">A shaft carrying a load far below its yield strength still snaps after thousands of turns.</p>
+            <p class="obj-sentence">We simulate when, why and how to stop it.</p>
+            <div class="fatigue-def-lines">
+              <p>Repeated cyclic stress, even below yield, starts a tiny crack at the surface or at a notch.</p>
+              <p>The crack grows a little every cycle with every single revolution of the shaft.</p>
+              <p>When the remaining area is too small, the part breaks suddenly with almost no warning.</p>
+            </div>
+            <div class="sheet-joke">
+              <strong>TEAM OBSERVATION:</strong> Steel gets tired just like mechanical engineering students during submissions—except steel doesn't drink tea, it just snaps.
+            </div>
+          </div>
+
+          <!-- Paperclip Hook Widget -->
+          <div class="paperclip-card">
+            <div class="panel-header" style="width:100%;margin-bottom:6px;">
+              <span class="panel-title" style="font-size:13px;">HOOK WIDGET: THE BENT CLIP</span>
+              <span class="panel-tag">FATIGUE ANALOG</span>
+            </div>
+            <svg id="paperclip-svg" viewBox="0 0 240 110" aria-label="Paperclip bending fatigue simulation">
+              <defs>
+                <pattern id="clip-grid" width="8" height="8" patternUnits="userSpaceOnUse">
+                  <path d="M 8 0 L 0 0 0 8" fill="none" stroke="rgba(31,35,40,0.06)" stroke-width="1"/>
+                </pattern>
+              </defs>
+              <rect width="240" height="110" fill="url(#clip-grid)" />
+              <g id="clip-unbroken">
+                <!-- Outer loop -->
+                <path id="clip-wire-fixed" d="M 30 55 L 120 55" fill="none" stroke="#1F2328" stroke-width="5" stroke-linecap="round"/>
+                <!-- Movable arm rotating around (120, 55) -->
+                <path id="clip-wire-moving" d="M 120 55 C 150 55, 190 40, 200 55 C 210 70, 160 85, 100 85 C 60 85, 45 70, 45 55 C 45 40, 75 25, 140 25 C 180 25, 195 40, 190 55" fill="none" stroke="#2B5C8A" stroke-width="5" stroke-linecap="round"/>
+                <!-- Hinge notch / crack indicator -->
+                <circle id="clip-hinge" cx="120" cy="55" r="4" fill="#F26B21"/>
+              </g>
+              <g id="clip-broken" style="display:none;">
+                <path d="M 30 55 L 115 52" fill="none" stroke="#1F2328" stroke-width="5" stroke-linecap="round"/>
+                <path d="M 126 62 C 155 60, 192 48, 202 62 C 212 76, 162 90, 105 88" fill="none" stroke="#F26B21" stroke-width="5" stroke-linecap="round"/>
+                <text x="120" y="38" font-family="'Barlow Condensed', sans-serif" font-weight="700" font-size="16" fill="#F26B21" text-anchor="middle">SNAP!</text>
+              </g>
+            </svg>
+            <div class="clip-controls">
+              <button id="btn-bend-clip" class="btn btn-primary" type="button">BEND IT!</button>
+              <button id="btn-reset-clip" class="btn" type="button">RESET</button>
+            </div>
+            <div id="clip-msg" class="clip-status">Bends: <strong>0</strong> | Hinge integrity: 100%</div>
+            <div style="font-size:10.5px;color:var(--secondary);margin-top:4px;">Our lab paperclip died for science. Don't let your shafts do the same.</div>
+          </div>
+        </div>
+
+        <!-- 3-Step Strip -->
+        <div class="three-step-strip">
+          <div class="step-box">
+            <div class="step-header">01 / START</div>
+            <svg viewBox="0 0 160 70">
+              <rect x="10" y="10" width="140" height="50" fill="#FFF" stroke="#1F2328" stroke-width="1.5"/>
+              <path d="M 80 10 L 80 22" stroke="#F26B21" stroke-width="2.5"/>
+              <circle cx="80" cy="22" r="2" fill="#F26B21"/>
+              <text x="80" y="60" font-family="'Overpass Mono', monospace" font-size="9" fill="#1F2328" text-anchor="middle">NOTCH CONCENTRATION</text>
+            </svg>
+            <div class="step-caption">Crack begins at surface</div>
+          </div>
+          <div class="step-box">
+            <div class="step-header">02 / GROW</div>
+            <svg viewBox="0 0 160 70">
+              <rect x="10" y="10" width="140" height="50" fill="#FFF" stroke="#1F2328" stroke-width="1.5"/>
+              <path d="M 70 10 Q 80 22 90 10" fill="none" stroke="#2B5C8A" stroke-width="1.5"/>
+              <path d="M 62 10 Q 80 30 98 10" fill="none" stroke="#2B5C8A" stroke-width="1.5"/>
+              <path d="M 54 10 Q 80 38 106 10" fill="none" stroke="#2B5C8A" stroke-width="1.5"/>
+              <text x="80" y="60" font-family="'Overpass Mono', monospace" font-size="9" fill="#2B5C8A" text-anchor="middle">BEACH MARK RINGS</text>
+            </svg>
+            <div class="step-caption">Beach marks advance inward</div>
+          </div>
+          <div class="step-box">
+            <div class="step-header">03 / SNAP</div>
+            <svg viewBox="0 0 160 70">
+              <path d="M 10 10 L 60 10 L 75 35 L 70 60 L 10 60 Z" fill="#FFF" stroke="#1F2328" stroke-width="1.5"/>
+              <path d="M 150 10 L 100 10 L 85 35 L 90 60 L 150 60 Z" fill="#FFF" stroke="#1F2328" stroke-width="1.5"/>
+              <line x1="75" y1="35" x2="85" y2="35" stroke="#F26B21" stroke-width="2" stroke-dasharray="2,2"/>
+              <text x="80" y="55" font-family="'Overpass Mono', monospace" font-size="9" fill="#F26B21" text-anchor="middle">CATASTROPHIC</text>
+            </svg>
+            <div class="step-caption">Sudden final catastrophic snap</div>
+          </div>
+        </div>
+
+        <!-- Real Cases Timeline -->
+        <div class="cases-timeline">
+          <div class="timeline-item">
+            <span class="timeline-year">1842</span>
+            <span class="timeline-case">Versailles Rail Disaster:</span>
+            <span class="timeline-desc">Locomotive axle shattered from rotating fatigue, prompting Rankine and Wöhler's pioneering studies.</span>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-year">1954</span>
+            <span class="timeline-case">de Havilland Comet:</span>
+            <span class="timeline-desc">Square window corners generated intense stress concentrations, tearing fuselages during pressurization cycles.</span>
+          </div>
+          <div class="timeline-item">
+            <span class="timeline-year">1980</span>
+            <span class="timeline-case">Alexander L. Kielland:</span>
+            <span class="timeline-desc">A fatigue crack initiating from an uninspected hydrophone weld severed a bracing column, capsizing the rig.</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="hazard-stripe"></div>
+
+    <!-- ====================================================================
+         SHEET 02: MATERIAL
+         ==================================================================== -->
+    <section id="sheet-material" class="sheet">
+      <div class="sheet-header">
+        <h2 class="sheet-header-title"><span class="sheet-num">02 /</span> MATERIAL BEHAVIOR</h2>
+        <div class="dim-line">
+          <span class="dim-arrow">◀</span>
+          <span class="dim-rule"></span>
+          <span class="dim-label">ENDURANCE LIMIT PROPERTIES &bull; S-N RESPONSE</span>
+          <span class="dim-rule"></span>
+          <span class="dim-arrow">▶</span>
+        </div>
+      </div>
+
+      <div class="panel crosshair">
+        <div class="crosshair-corner ch-tl"></div>
+        <div class="crosshair-corner ch-tr"></div>
+        <div class="crosshair-corner ch-bl"></div>
+        <div class="crosshair-corner ch-br"></div>
+
+        <div class="material-grid">
+          <div>
+            <table class="data-table" aria-label="Material fatigue properties">
+              <thead>
+                <tr>
+                  <th>Material Alloy</th>
+                  <th>Su [MPa]</th>
+                  <th>Endurance Limit Se</th>
+                  <th>Endurance Knee?</th>
+                  <th>Specimen Ratio</th>
+                </tr>
+              </thead>
+              <tbody id="material-tbody">
+                <tr>
+                  <td><strong>AISI 1020 CD</strong></td>
+                  <td class="mono-cell">470</td>
+                  <td class="mono-cell">235 MPa</td>
+                  <td style="color:var(--steel-blue);font-weight:600;">YES (&ge; 10⁶)</td>
+                  <td class="mono-cell">0.50 &times; Su</td>
+                </tr>
+                <tr style="background:#FDFBF7;">
+                  <td><strong>AISI 1045 CD</strong> (Baseline)</td>
+                  <td class="mono-cell">630</td>
+                  <td class="mono-cell">315 MPa</td>
+                  <td style="color:var(--steel-blue);font-weight:600;">YES (&ge; 10⁶)</td>
+                  <td class="mono-cell">0.50 &times; Su</td>
+                </tr>
+                <tr>
+                  <td><strong>AISI 4140 Q&amp;T</strong></td>
+                  <td class="mono-cell">1000</td>
+                  <td class="mono-cell">500 MPa</td>
+                  <td style="color:var(--steel-blue);font-weight:600;">YES (&ge; 10⁶)</td>
+                  <td class="mono-cell">0.50 &times; Su</td>
+                </tr>
+                <tr>
+                  <td><strong>Al 6061-T6</strong></td>
+                  <td class="mono-cell">310</td>
+                  <td class="mono-cell">93 MPa (at 5&times;10⁸)</td>
+                  <td style="color:var(--safety-orange);font-weight:600;">NO (Keeps falling)</td>
+                  <td class="mono-cell">0.30 &times; Su</td>
+                </tr>
+              </tbody>
+            </table>
+
+            <div style="margin-top:10px;font-size:12.5px;line-height:1.45;">
+              <p><strong>Steel has a safe zone. Aluminium never fully does.</strong></p>
+              <p>Steels and titanium alloys show an endurance limit; most non-ferrous alloys such as aluminium do not.</p>
+              <p>AISI 1045 is our baseline because it is the most common carbon steel for industrial drive shafts.</p>
+            </div>
+
+            <div class="sheet-joke">
+              <strong>LAB WITTICISM:</strong> Aluminium never sleeps, never stops fatiguing, and never forgets a single load cycle.
+            </div>
+          </div>
+
+          <div>
+            <div class="panel-header">
+              <span class="panel-title">S-N SKETCHES</span>
+              <span class="panel-tag">STEEL VS ALUMINIUM</span>
+            </div>
+            <div class="sketches-box">
+              <div class="sn-sketch-card">
+                <div style="font-family:var(--font-heading);font-weight:700;font-size:12px;color:var(--steel-blue);">FERROUS STEEL</div>
+                <svg viewBox="0 0 160 80">
+                  <line x1="20" y1="70" x2="150" y2="70" stroke="#1F2328" stroke-width="1"/>
+                  <line x1="20" y1="10" x2="20" y2="70" stroke="#1F2328" stroke-width="1"/>
+                  <!-- S-N curve with knee -->
+                  <path d="M 25 20 Q 70 35 100 50 L 150 50" fill="none" stroke="#2B5C8A" stroke-width="2"/>
+                  <line x1="20" y1="50" x2="150" y2="50" stroke="#2B5C8A" stroke-dasharray="2,2" stroke-width="1"/>
+                  <text x="105" y="44" font-family="'Overpass Mono', monospace" font-size="8" fill="#2B5C8A">ENDURANCE KNEE Se</text>
+                  <text x="80" y="78" font-family="'Overpass Mono', monospace" font-size="7" fill="#6B7380">10³ &rarr; 10⁶ CYCLES</text>
+                </svg>
+                <div style="font-size:10px;color:var(--secondary);">Safe plateau &gt; 10⁶ cycles</div>
+              </div>
+
+              <div class="sn-sketch-card">
+                <div style="font-family:var(--font-heading);font-weight:700;font-size:12px;color:var(--safety-orange);">ALUMINIUM ALLOY</div>
+                <svg viewBox="0 0 160 80">
+                  <line x1="20" y1="70" x2="150" y2="70" stroke="#1F2328" stroke-width="1"/>
+                  <line x1="20" y1="10" x2="20" y2="70" stroke="#1F2328" stroke-width="1"/>
+                  <!-- S-N curve falling continuously -->
+                  <path d="M 25 20 Q 70 40 150 65" fill="none" stroke="#F26B21" stroke-width="2"/>
+                  <text x="85" y="48" font-family="'Overpass Mono', monospace" font-size="8" fill="#F26B21">CONTINUOUS DROP</text>
+                  <text x="80" y="78" font-family="'Overpass Mono', monospace" font-size="7" fill="#6B7380">NO TRUE PLATEAU</text>
+                </svg>
+                <div style="font-size:10px;color:var(--secondary);">Strength degrades continuously</div>
+              </div>
+            </div>
+
+            <div class="assumptions-box">
+              <strong style="font-family:var(--font-heading);text-transform:uppercase;">Our Model Assumptions:</strong>
+              <ul>
+                <li>Fully reversed rotating bending load (R = -1, zero mean stress).</li>
+                <li>Ambient room temperature operating conditions without thermal creep.</li>
+                <li>Clean, dry environment without chemical corrosion or pitting.</li>
+                <li>Simply supported shaft with a concentrated central point load.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <!-- 6 Factors Chips -->
+        <div style="margin-top:16px;">
+          <div class="panel-header" style="margin-bottom:6px;">
+            <span class="panel-title">FACTORS THAT MODIFY FATIGUE LIFE</span>
+            <span class="panel-tag">MARIN FACTORS</span>
+          </div>
+          <div class="factors-grid">
+            <div class="factor-chip" id="chip-load">
+              <div>
+                <div class="factor-name">1. Stress Amplitude</div>
+                <div class="factor-desc">Higher bending load shortens shaft life exponentially.</div>
+              </div>
+              <span class="factor-tag" data-target="slider-load" tabindex="0">see in Lab: Load / Dia</span>
+            </div>
+
+            <div class="factor-chip" id="chip-notch">
+              <div>
+                <div class="factor-name">2. Stress Concentration</div>
+                <div class="factor-desc">Sharp notches and shoulders multiply peak surface stress.</div>
+              </div>
+              <span class="factor-tag" data-target="select-notch" tabindex="0">see in Lab: Notch</span>
+            </div>
+
+            <div class="factor-chip" id="chip-surface">
+              <div>
+                <div class="factor-name">3. Surface Finish</div>
+                <div class="factor-desc">Rough machining creates microscopic starter notches.</div>
+              </div>
+              <span class="factor-tag" data-target="select-surface" tabindex="0">see in Lab: Surface</span>
+            </div>
+
+            <div class="factor-chip" id="chip-size">
+              <div>
+                <div class="factor-name">4. Component Size</div>
+                <div class="factor-desc">Larger diameters carry higher statistical flaw volume.</div>
+              </div>
+              <span class="factor-tag" data-target="slider-dia" tabindex="0">see in Lab: Diameter</span>
+            </div>
+
+            <div class="factor-chip" id="chip-mat">
+              <div>
+                <div class="factor-name">5. Material Strength</div>
+                <div class="factor-desc">Harder steel resists fatigue crack initiation better.</div>
+              </div>
+              <span class="factor-tag" data-target="select-material" tabindex="0">see in Lab: Material</span>
+            </div>
+
+            <div class="factor-chip" id="chip-env">
+              <div>
+                <div class="factor-name">6. Environment</div>
+                <div class="factor-desc">Corrosive chemical pits destroy the steel endurance limit.</div>
+              </div>
+              <span class="factor-tag" data-target="chip-env" tabindex="0">see in Lab: Note only</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="hazard-stripe"></div>
+
+    <!-- ====================================================================
+         SHEET 03: SHAFT LAB (THE HERO SIMULATION)
+         ==================================================================== -->
+    <section id="sheet-lab" class="sheet">
+      <div class="sheet-header">
+        <h2 class="sheet-header-title"><span class="sheet-num">03 /</span> SHAFT LAB</h2>
+        <div class="dim-line">
+          <span class="dim-arrow">◀</span>
+          <span class="dim-rule"></span>
+          <span class="dim-label">ROTATING BENDING BENCH &bull; S-N FATIGUE LIFE PREDICTOR</span>
+          <span class="dim-rule"></span>
+          <span class="dim-arrow">▶</span>
+        </div>
+      </div>
+
+      <div class="panel crosshair" id="lab-main-panel">
+        <div class="crosshair-corner ch-tl"></div>
+        <div class="crosshair-corner ch-tr"></div>
+        <div class="crosshair-corner ch-bl"></div>
+        <div class="crosshair-corner ch-br"></div>
+
+        <div class="lab-layout">
+          <!-- Left Column: Animations -->
+          <div class="lab-left">
+            <!-- Side View of Rotating Shaft -->
+            <div class="canvas-card" id="card-shaft-side">
+              <div class="canvas-title-bar">
+                <span>SHAFT DEFLECTION &amp; REVERSED BENDING STRESS</span>
+                <span>EXAGGERATED DEFLECTION &times;500</span>
+              </div>
+              <div style="position:relative;">
+                <canvas id="canvas-shaft-side" width="680" height="160" aria-label="Shaft side view animation"></canvas>
+                <!-- Rubber stamps for Run to Failure -->
+                <div id="stamp-failed" class="stamp-overlay stamp-failed">FAILED</div>
+                <div id="stamp-runout" class="stamp-overlay stamp-runout">RUNOUT &mdash; NO FAILURE</div>
+              </div>
+            </div>
+
+            <!-- Dual Visualizations: Cross Section & Wave -->
+            <div class="dual-viz-row">
+              <div class="canvas-card">
+                <div class="canvas-title-bar">
+                  <span>CROSS SECTION STRESS MAP</span>
+                  <span>FIXED FIELD &bull; ROTATING MATERIAL</span>
+                </div>
+                <canvas id="canvas-cross-section" width="280" height="140" aria-label="Cross-section stress distribution"></canvas>
+              </div>
+
+              <div class="canvas-card">
+                <div class="canvas-title-bar">
+                  <span>LIVE FIBRE STRESS SINE WAVE</span>
+                  <span>R = -1 CYCLIC REVERSAL</span>
+                </div>
+                <canvas id="canvas-stress-wave" width="380" height="140" aria-label="Cyclic stress wave chart"></canvas>
+              </div>
+            </div>
+
+            <div class="sheet-joke" style="margin:2px 0;">
+              <strong>VIVA POINT:</strong> A rotating shaft under bending is the ultimate existential torture: every 180 degrees, tension flips into compression.
+            </div>
+          </div>
+
+          <!-- Right Column: Controls, S-N Chart, Gauges -->
+          <div class="lab-right">
+            <!-- S-N Chart -->
+            <div class="canvas-card">
+              <div class="canvas-title-bar">
+                <span>BASQUIN S-N CURVE &bull; OPERATING POINT</span>
+                <span id="sn-operating-status">CALCULATED</span>
+              </div>
+              <canvas id="canvas-sn-chart" width="480" height="160" aria-label="Log-log S-N curve"></canvas>
+            </div>
+
+            <!-- Gauges Row: Safety Factor Dial & Odometer -->
+            <div class="gauges-row">
+              <div class="canvas-card" style="padding:6px;">
+                <div class="canvas-title-bar">
+                  <span>SAFETY FACTOR n</span>
+                  <div class="popover-container">
+                    <button class="hint-btn" data-hint="Ratio of modified endurance limit Se to effective notch stress: n = Se / σeff" aria-label="Hint: Safety factor">?</button>
+                  </div>
+                </div>
+                <canvas id="canvas-dial-gauge" width="220" height="110" aria-label="Safety factor dial gauge"></canvas>
+              </div>
+
+              <div class="odometer-box">
+                <div class="odometer-label">ACCUMULATED CYCLES</div>
+                <div class="odometer-digits" id="odometer-readout">00000000</div>
+                <div style="font-size:10px;color:#A0AEC0;margin-top:3px;font-family:var(--font-mono);" id="odometer-sub">NORMAL SPEED</div>
+              </div>
+            </div>
+
+            <!-- Status LED -->
+            <div class="status-led-bar">
+              <div class="led-bulb" id="status-led"></div>
+              <span id="status-led-text" style="font-weight:600;">SAFE ZONE: RUNOUT (INFINITE LIFE)</span>
+            </div>
+
+            <!-- Controls Panel -->
+            <div class="panel" style="margin-bottom:0;padding:10px;">
+              <div class="controls-grid">
+                <!-- Preset -->
+                <div class="control-item" style="grid-column: span 2;">
+                  <label class="control-label" for="select-preset">
+                    <span>APPLICATION PRESET</span>
+                    <span class="control-val" id="val-preset">Conveyor (Runout)</span>
+                  </label>
+                  <select id="select-preset" class="input-select">
+                    <option value="conveyor">Conveyor roller shaft (Runout, F 2000N, d 40mm, AISI 1020)</option>
+                    <option value="gearbox">Gearbox shaft (Finite ~1e5, F 3000N, d 30mm, AISI 1045)</option>
+                    <option value="pump">Rough forged pump shaft (Finite ~2e5, F 2500N, d 35mm, As-forged)</option>
+                    <option value="bicycle">Bicycle axle (Finite ~4e6, F 1200N, d 17mm, Al 6061-T6)</option>
+                    <option value="custom">-- Custom Manual Adjustments --</option>
+                  </select>
+                </div>
+
+                <!-- Material -->
+                <div class="control-item">
+                  <label class="control-label" for="select-material">
+                    <span>MATERIAL</span>
+                  </label>
+                  <select id="select-material" class="input-select">
+                    <option value="1020">AISI 1020 CD (Su 470 MPa)</option>
+                    <option value="1045" selected>AISI 1045 CD (Su 630 MPa)</option>
+                    <option value="4140">AISI 4140 Q&T (Su 1000 MPa)</option>
+                    <option value="6061">Al 6061-T6 (Su 310 MPa)</option>
+                  </select>
+                </div>
+
+                <!-- Surface Finish -->
+                <div class="control-item">
+                  <label class="control-label" for="select-surface">
+                    <span>SURFACE FINISH</span>
+                  </label>
+                  <select id="select-surface" class="input-select">
+                    <option value="ground">Ground (ka ~0.91)</option>
+                    <option value="machined" selected>Machined (ka ~0.82)</option>
+                    <option value="hot-rolled">Hot-rolled (ka ~0.57)</option>
+                    <option value="as-forged">As-forged (ka ~0.45)</option>
+                  </select>
+                </div>
+
+                <!-- Notch Geometry -->
+                <div class="control-item">
+                  <label class="control-label" for="select-notch">
+                    <span>NOTCH GEOMETRY</span>
+                  </label>
+                  <select id="select-notch" class="input-select">
+                    <option value="smooth">Smooth shaft (Kt 1.0)</option>
+                    <option value="fillet" selected>Round fillet (Kt 1.5)</option>
+                    <option value="keyway">Keyway slot (Kt 2.0)</option>
+                    <option value="shoulder">Sharp shoulder (Kt 2.5)</option>
+                  </select>
+                </div>
+
+                <!-- Load F -->
+                <div class="control-item">
+                  <label class="control-label" for="slider-load">
+                    <span>LOAD F</span>
+                    <span class="control-val" id="val-load">3000 N</span>
+                  </label>
+                  <input type="range" id="slider-load" class="slider-square" min="100" max="5000" step="50" value="3000">
+                </div>
+
+                <!-- Length L -->
+                <div class="control-item">
+                  <label class="control-label" for="slider-len">
+                    <span>SPAN L</span>
+                    <span class="control-val" id="val-len">0.60 m</span>
+                  </label>
+                  <input type="range" id="slider-len" class="slider-square" min="0.2" max="1.0" step="0.05" value="0.6">
+                </div>
+
+                <!-- Diameter d -->
+                <div class="control-item">
+                  <label class="control-label" for="slider-dia">
+                    <span>DIAMETER d</span>
+                    <span class="control-val" id="val-dia">30 mm</span>
+                  </label>
+                  <input type="range" id="slider-dia" class="slider-square" min="10" max="60" step="1" value="30">
+                </div>
+
+                <!-- Speed RPM -->
+                <div class="control-item" style="grid-column: span 2;">
+                  <label class="control-label" for="slider-rpm">
+                    <span>SHAFT SPEED</span>
+                    <span class="control-val" id="val-rpm">1500 RPM</span>
+                  </label>
+                  <input type="range" id="slider-rpm" class="slider-square" min="100" max="3000" step="50" value="1500">
+                </div>
+              </div>
+
+              <!-- Action Buttons -->
+              <div class="action-btn-row">
+                <button id="btn-run-pause" class="btn btn-secondary" type="button" style="flex:1;">PAUSE</button>
+                <button id="btn-run-failure" class="btn btn-primary" type="button" style="flex:1.4;">RUN TO FAILURE</button>
+                <button id="btn-reset-lab" class="btn" type="button" style="flex:0.8;">RESET</button>
+              </div>
+            </div>
+
+            <!-- Technical Readouts -->
+            <div class="readouts-grid">
+              <div class="readout-box">
+                <div class="readout-label">
+                  <span>MOMENT M</span>
+                  <div class="popover-container">
+                    <button class="hint-btn" data-hint="Maximum midspan bending moment: M = F·L / 4" aria-label="Hint: Bending Moment">?</button>
+                  </div>
+                </div>
+                <div class="readout-value"><span id="out-m">450.0</span><span class="readout-unit">N&bull;m</span></div>
+              </div>
+
+              <div class="readout-box">
+                <div class="readout-label">
+                  <span>STRESS &sigma;a</span>
+                  <div class="popover-container">
+                    <button class="hint-btn" data-hint="Nominal alternating bending stress: 32·M / (π·d³)" aria-label="Hint: Alternating Stress">?</button>
+                  </div>
+                </div>
+                <div class="readout-value"><span id="out-sigma-a">169.8</span><span class="readout-unit">MPa</span></div>
+              </div>
+
+              <div class="readout-box">
+                <div class="readout-label">
+                  <span>PEAK &sigma;eff</span>
+                  <div class="popover-container">
+                    <button class="hint-btn" data-hint="Effective notch stress: σeff = Kf · σa, where Kf = 1 + 0.8·(Kt-1)" aria-label="Hint: Effective Stress">?</button>
+                  </div>
+                </div>
+                <div class="readout-value"><span id="out-sigma-eff">305.6</span><span class="readout-unit">MPa</span></div>
+              </div>
+
+              <div class="readout-box">
+                <div class="readout-label">
+                  <span>LIMIT Se</span>
+                  <div class="popover-container">
+                    <button class="hint-btn" data-hint="Modified endurance limit: Se = ka · kb · 0.5·Su" aria-label="Hint: Endurance Limit">?</button>
+                  </div>
+                </div>
+                <div class="readout-value"><span id="out-se">221.8</span><span class="readout-unit">MPa</span></div>
+              </div>
+
+              <div class="readout-box">
+                <div class="readout-label">
+                  <span>LIFE N</span>
+                  <div class="popover-container">
+                    <button class="hint-btn" data-hint="Basquin fatigue life estimate: N = (σeff / A)^(1/B) or Runout" aria-label="Hint: Life Cycles">?</button>
+                  </div>
+                </div>
+                <div class="readout-value"><span id="out-n">9.5 &times; 10⁴</span><span class="readout-unit">cyc</span></div>
+              </div>
+
+              <div class="readout-box">
+                <div class="readout-label">
+                  <span>TIME LIFE</span>
+                  <div class="popover-container">
+                    <button class="hint-btn" data-hint="Operational operating time until fracture: Hours = N / (rpm · 60)" aria-label="Hint: Time Life">?</button>
+                  </div>
+                </div>
+                <div class="readout-value"><span id="out-time">1.1</span><span class="readout-unit" id="out-time-unit">hours</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- LIVE CALCULATION STRIP (VIVA WORKED EXAMPLE) -->
+        <div class="calc-strip-title">
+          <span>LIVE VIVA CALCULATION STRIP</span>
+          <span style="font-size:10px;font-family:var(--font-mono);color:var(--secondary);">(Dynamic formula evaluation with current test numbers)</span>
+        </div>
+        <div class="calc-chain" id="live-calc-chain">
+          <!-- Step 1: M -->
+          <div class="calc-step-box">
+            <div class="calc-step-head">1. Bending Moment M</div>
+            <div class="calc-step-formula">M = F &times; L / 4</div>
+            <div class="calc-step-subst" id="cstep-m-sub">3000 &times; 0.60 / 4</div>
+            <div class="calc-step-res" id="cstep-m-res">450.0 N&bull;m</div>
+          </div>
+          <!-- Step 2: sigma_a -->
+          <div class="calc-step-box">
+            <div class="calc-step-head">2. Nominal Stress &sigma;a</div>
+            <div class="calc-step-formula">&sigma;a = 32M / (&pi;&bull;d&sup3;)</div>
+            <div class="calc-step-subst" id="cstep-sa-sub">32&times;450 / (&pi;&times;0.03&sup3;)</div>
+            <div class="calc-step-res" id="cstep-sa-res">169.8 MPa</div>
+          </div>
+          <!-- Step 3: Kf -->
+          <div class="calc-step-box">
+            <div class="calc-step-head">3. Fatigue Notch Kf</div>
+            <div class="calc-step-formula">Kf = 1 + q(Kt - 1)</div>
+            <div class="calc-step-subst" id="cstep-kf-sub">1 + 0.8&times;(2.0 - 1)</div>
+            <div class="calc-step-res" id="cstep-kf-res">1.80</div>
+          </div>
+          <!-- Step 4: sigma_eff -->
+          <div class="calc-step-box">
+            <div class="calc-step-head">4. Effective Stress</div>
+            <div class="calc-step-formula">&sigma;eff = Kf &times; &sigma;a</div>
+            <div class="calc-step-subst" id="cstep-seff-sub">1.80 &times; 169.8</div>
+            <div class="calc-step-res" id="cstep-seff-res">305.6 MPa</div>
+          </div>
+          <!-- Step 5: Se -->
+          <div class="calc-step-box">
+            <div class="calc-step-head">5. Endurance Limit Se</div>
+            <div class="calc-step-formula">Se = ka &times; kb &times; Se'</div>
+            <div class="calc-step-subst" id="cstep-se-sub">0.82 &times; 0.86 &times; 315</div>
+            <div class="calc-step-res" id="cstep-se-res">221.8 MPa</div>
+          </div>
+          <!-- Step 6: N -->
+          <div class="calc-step-box">
+            <div class="calc-step-head">6. Predicted Life N</div>
+            <div class="calc-step-formula">N = (&sigma;eff / A)^(1/B)</div>
+            <div class="calc-step-subst" id="cstep-n-sub">(305.6 / 1448)^(-7.37)</div>
+            <div class="calc-step-res" id="cstep-n-res">9.5 &times; 10⁴ cyc</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="hazard-stripe"></div>
+
+    <!-- ====================================================================
+         SHEET 04: CRACK GROWTH LAB
+         ==================================================================== -->
+    <section id="sheet-crack" class="sheet">
+      <div class="sheet-header">
+        <h2 class="sheet-header-title"><span class="sheet-num">04 /</span> CRACK GROWTH LAB</h2>
+        <div class="dim-line">
+          <span class="dim-arrow">◀</span>
+          <span class="dim-rule"></span>
+          <span class="dim-label">FRACTURE MECHANICS &bull; PARIS LAW PROPAGATION</span>
+          <span class="dim-rule"></span>
+          <span class="dim-arrow">▶</span>
+        </div>
+      </div>
+
+      <div class="panel crosshair">
+        <div class="crosshair-corner ch-tl"></div>
+        <div class="crosshair-corner ch-tr"></div>
+        <div class="crosshair-corner ch-bl"></div>
+        <div class="crosshair-corner ch-br"></div>
+
+        <div class="crack-sync-banner">
+          &bull; <strong>LIVE LAB LINK:</strong> Working stress from Lab: <strong id="crack-sync-stress">305.6 MPa</strong> (change load/geometry in Sheet 03 to modify propagation driving force).
+        </div>
+
+        <div class="crack-layout">
+          <div>
+            <div class="canvas-card">
+              <div class="canvas-title-bar">
+                <span>BEACH-MARK PROPAGATION &amp; FAST-FRACTURE SECTION</span>
+                <span id="crack-canvas-status">PROPAGATING</span>
+              </div>
+              <canvas id="canvas-crack-front" width="600" height="260" aria-label="Shaft cross-section showing beach marks and fracture surface"></canvas>
+            </div>
+
+            <div class="sheet-joke" style="margin-top:8px;">
+              <strong>CRACK WISDOM:</strong> Cracks are introverts: they spend 95% of their life quietly hiding, then cause massive catastrophic drama in the last 5%.
+            </div>
+          </div>
+
+          <div>
+            <div class="canvas-card">
+              <div class="canvas-title-bar">
+                <span>CRACK SIZE VS CYCLES (HOCKEY STICK)</span>
+                <span>da/dN = C(&Delta;K)&sup3;</span>
+              </div>
+              <canvas id="canvas-crack-chart" width="450" height="180" aria-label="Hockey stick curve of crack size vs cycles"></canvas>
+            </div>
+
+            <!-- Crack Controls -->
+            <div class="panel" style="margin-top:10px;margin-bottom:0;padding:10px;">
+              <div class="control-item">
+                <label class="control-label" for="slider-a0">
+                  <span>INITIAL FLAW SIZE a0</span>
+                  <span class="control-val" id="val-a0">1.00 mm</span>
+                </label>
+                <input type="range" id="slider-a0" class="slider-square" min="0.1" max="2.0" step="0.05" value="1.0">
+              </div>
+
+              <div class="action-btn-row" style="margin-top:8px;">
+                <button id="btn-crack-play" class="btn btn-primary" type="button" style="flex:1;">PLAY</button>
+                <button id="btn-crack-reset" class="btn" type="button" style="flex:1;">REPLAY</button>
+                <button id="btn-crack-speed" class="btn btn-secondary" type="button" style="flex:0.8;">SPEED: 1x</button>
+              </div>
+
+              <!-- Crack Readouts -->
+              <div class="crack-readouts-grid">
+                <div class="readout-box">
+                  <div class="readout-label">
+                    <span>CRACK SIZE a</span>
+                    <div class="popover-container">
+                      <button class="hint-btn" data-hint="Current crack depth propagating inward from the notch" aria-label="Hint: Crack Depth">?</button>
+                    </div>
+                  </div>
+                  <div class="readout-value"><span id="out-crack-a">1.00</span><span class="readout-unit">mm</span></div>
+                </div>
+
+                <div class="readout-box">
+                  <div class="readout-label">
+                    <span>STRESS INTENSITY &Delta;K</span>
+                    <div class="popover-container">
+                      <button class="hint-btn" data-hint="Stress intensity factor range: ΔK = 1.12 · σeff · √(π·a)" aria-label="Hint: Stress Intensity">?</button>
+                    </div>
+                  </div>
+                  <div class="readout-value"><span id="out-crack-dk">19.2</span><span class="readout-unit">MPa&radic;m</span></div>
+                </div>
+
+                <div class="readout-box">
+                  <div class="readout-label">
+                    <span>CYCLES N</span>
+                    <div class="popover-container">
+                      <button class="hint-btn" data-hint="Elapsed cyclic stress reversals during crack propagation" aria-label="Hint: Crack Cycles">?</button>
+                    </div>
+                  </div>
+                  <div class="readout-value"><span id="out-crack-n">0</span><span class="readout-unit">cyc</span></div>
+                </div>
+
+                <div class="readout-box">
+                  <div class="readout-label">
+                    <span>PROPAGATION LIFE</span>
+                    <div class="popover-container">
+                      <button class="hint-btn" data-hint="Percentage of total crack propagation stage elapsed" aria-label="Hint: Propagation Percent">?</button>
+                    </div>
+                  </div>
+                  <div class="readout-value"><span id="out-crack-pct">0</span><span class="readout-unit">%</span></div>
+                </div>
+              </div>
+
+              <div style="margin-top:10px;font-size:11.5px;line-height:1.4;">
+                <p><strong>Most of the life is spent while the crack is tiny. The end takes a blink.</strong></p>
+                <p style="color:var(--secondary);font-size:10.5px;margin-top:2px;">Propagation stage only; crack start-up time not included.</p>
+              </div>
+
+              <!-- How to read a broken shaft -->
+              <div class="crack-legend">
+                <div style="font-family:var(--font-heading);font-weight:700;margin-bottom:4px;font-size:12px;">HOW TO READ A BROKEN SHAFT:</div>
+                <div class="crack-legend-item"><strong>ORIGIN:</strong> Where the crack began (often a sharp keyway, notch or deep scratch).</div>
+                <div class="crack-legend-item"><strong>BEACH MARKS:</strong> Rest lines left as the crack front advanced during cyclic load shifts.</div>
+                <div class="crack-legend-item"><strong>FAST-FRACTURE:</strong> Sudden final snap. Small fast zone = low nominal stress; large fast zone = high stress overload.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="hazard-stripe"></div>
+
+    <!-- ====================================================================
+         SHEET 05: FINDINGS (COMPUTED BENCHMARK)
+         ==================================================================== -->
+    <section id="sheet-findings" class="sheet">
+      <div class="sheet-header">
+        <h2 class="sheet-header-title"><span class="sheet-num">05 /</span> COMPUTED FINDINGS</h2>
+        <div class="dim-line">
+          <span class="dim-arrow">◀</span>
+          <span class="dim-rule"></span>
+          <span class="dim-label">DESIGN OPTIMIZATION &bull; LIFE COMPARISON</span>
+          <span class="dim-rule"></span>
+          <span class="dim-arrow">▶</span>
+        </div>
+      </div>
+
+      <div class="panel crosshair">
+        <div class="crosshair-corner ch-tl"></div>
+        <div class="crosshair-corner ch-tr"></div>
+        <div class="crosshair-corner ch-bl"></div>
+        <div class="crosshair-corner ch-br"></div>
+
+        <div class="findings-controls">
+          <div>
+            <span style="font-family:var(--font-heading);font-weight:700;font-size:15px;color:var(--graphite);">GEARBOX SHAFT FIX BENCHMARK</span>
+            <span style="font-size:11px;font-family:var(--font-mono);color:var(--secondary);margin-left:8px;">(Baseline: F 3000N, L 0.6m, d 30mm, AISI 1045, Machined, Keyway Kt 2.0)</span>
+          </div>
+          <button id="btn-run-comparison" class="btn btn-primary" type="button">RUN COMPARISON</button>
+        </div>
+
+        <!-- Horizontal Bar Chart -->
+        <div class="findings-chart" id="findings-bar-container">
+          <!-- Row 1: Baseline -->
+          <div class="bar-row">
+            <div class="bar-label">1. Baseline (Gearbox)</div>
+            <div class="bar-track">
+              <div class="bar-fill" id="bar-fill-0" style="width:0%;"></div>
+            </div>
+            <div class="bar-value" id="bar-val-0">9.5 &times; 10⁴ cyc</div>
+            <div class="bar-cost">&#8377; (Base)</div>
+          </div>
+
+          <!-- Row 2: Polished Surface -->
+          <div class="bar-row">
+            <div class="bar-label">2. Polished Surface (Ground)</div>
+            <div class="bar-track">
+              <div class="bar-fill" id="bar-fill-1" style="width:0%;"></div>
+            </div>
+            <div class="bar-value" id="bar-val-1">1.7 &times; 10⁵ cyc</div>
+            <div class="bar-cost">&#8377; &#8377;</div>
+          </div>
+
+          <!-- Row 3: Bigger Fillet -->
+          <div class="bar-row">
+            <div class="bar-label">3. Bigger Fillet (Kt 1.5)</div>
+            <div class="bar-track">
+              <div class="bar-fill" id="bar-fill-2" style="width:0%;"></div>
+            </div>
+            <div class="bar-value" id="bar-val-2">6.0 &times; 10⁵ cyc</div>
+            <div class="bar-cost">&#8377; (Tooling)</div>
+          </div>
+
+          <!-- Row 4: Shot Peening -->
+          <div class="bar-row">
+            <div class="bar-label">4. Shot Peening (Se &times;1.25)</div>
+            <div class="bar-track">
+              <div class="bar-fill" id="bar-fill-3" style="width:0%;"></div>
+            </div>
+            <div class="bar-value" id="bar-val-3">3.9 &times; 10⁵ cyc</div>
+            <div class="bar-cost">&#8377; &#8377;</div>
+          </div>
+
+          <!-- Row 5: Diameter +20% -->
+          <div class="bar-row">
+            <div class="bar-label">5. Diameter +20% (d = 36mm)</div>
+            <div class="bar-track">
+              <div class="bar-fill bar-runout" id="bar-fill-4" style="width:0%;"></div>
+            </div>
+            <div class="bar-value" id="bar-val-4" style="color:var(--safe-green);">RUNOUT &rarr; &infin;</div>
+            <div class="bar-cost">&#8377; &#8377;</div>
+          </div>
+
+          <!-- Row 6: Stronger Steel -->
+          <div class="bar-row">
+            <div class="bar-label">6. Stronger Steel (AISI 4140)</div>
+            <div class="bar-track">
+              <div class="bar-fill bar-runout" id="bar-fill-5" style="width:0%;"></div>
+            </div>
+            <div class="bar-value" id="bar-val-5" style="color:var(--safe-green);">RUNOUT &rarr; &infin;</div>
+            <div class="bar-cost">&#8377; &#8377; &#8377;</div>
+          </div>
+        </div>
+
+        <!-- Auto-Generated 3 Sentences -->
+        <div class="auto-insights-box" id="auto-insights">
+          <p id="insight-1">1. <strong>BEST CHEAP FIX:</strong> Smoothing the notch from Kt 2.0 to a 1.5 fillet multiplies life by 6.4x at almost zero extra manufacturing cost.</p>
+          <p id="insight-2">2. <strong>BIGGEST OVERALL GAIN:</strong> A modest 20% increase in shaft diameter slashes nominal bending stress by 42%, shifting the shaft directly into infinite life.</p>
+          <p id="insight-3">3. <strong>RUNOUT ACHIEVED:</strong> Both a 20% diameter increase and upgrading to AISI 4140 alloy steel eliminate fatigue failure completely by achieving runout.</p>
+        </div>
+
+        <div class="sheet-joke">
+          <strong>WORKSHOP REALITY:</strong> The cheapest way to make a shaft last forever is a 2-millimeter fillet radius; the most expensive way is a lawyer after it breaks.
+        </div>
+
+        <!-- 4 Static Design Rules -->
+        <div style="margin-top:14px;">
+          <div class="panel-header" style="margin-bottom:6px;">
+            <span class="panel-title">DESIGN RULES WE LEARNED</span>
+            <span class="panel-tag">BEST PRACTICES</span>
+          </div>
+          <div class="rules-grid">
+            <div class="rule-item">
+              <span class="rule-num">01.</span> Avoid sharp corners and keyways with sharp edges; specify generous fillet radii at all steps.
+            </div>
+            <div class="rule-item">
+              <span class="rule-num">02.</span> Finish or polish critical surfaces to eliminate microscopic machining notch roots and tool tear marks.
+            </div>
+            <div class="rule-item">
+              <span class="rule-num">03.</span> Keep working stress strictly below the endurance limit with a minimum safety factor of 1.5.
+            </div>
+            <div class="rule-item">
+              <span class="rule-num">04.</span> Inspect for cracks periodically using NDT methods before micro-flaws reach critical crack size ac.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="hazard-stripe"></div>
+
+    <!-- ====================================================================
+         SHEET 06: APPLICATIONS
+         ==================================================================== -->
+    <section id="sheet-applications" class="sheet">
+      <div class="sheet-header">
+        <h2 class="sheet-header-title"><span class="sheet-num">06 /</span> APPLICATIONS &amp; TITLE BLOCK</h2>
+        <div class="dim-line">
+          <span class="dim-arrow">◀</span>
+          <span class="dim-rule"></span>
+          <span class="dim-label">BILL OF PARTS &bull; NDT METHODS &bull; SIGN-OFF</span>
+          <span class="dim-rule"></span>
+          <span class="dim-arrow">▶</span>
+        </div>
+      </div>
+
+      <div class="panel crosshair">
+        <div class="crosshair-corner ch-tl"></div>
+        <div class="crosshair-corner ch-tr"></div>
+        <div class="crosshair-corner ch-bl"></div>
+        <div class="crosshair-corner ch-br"></div>
+
+        <!-- Bill of Parts Table -->
+        <div class="panel-header" style="margin-bottom:6px;">
+          <span class="panel-title">BILL OF CRITICAL FATIGUE PARTS</span>
+          <span class="panel-tag">MACHINE ELEMENTS</span>
+        </div>
+        <table class="data-table" aria-label="Real-world engineering fatigue applications">
+          <thead>
+            <tr>
+              <th style="width:40px;">Item</th>
+              <th style="width:160px;">Component</th>
+              <th>Fatigue Risk (Primary Mechanism)</th>
+              <th style="width:220px;">Typical Engineering Fix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="mono-cell">01</td>
+              <td><strong>Crankshaft</strong></td>
+              <td>Cyclic torque reversal and web bending</td>
+              <td>Deep fillet rolling and nitriding</td>
+            </tr>
+            <tr>
+              <td class="mono-cell">02</td>
+              <td><strong>Railway Axle</strong></td>
+              <td>Rotating bending under heavy wheel loads</td>
+              <td>Generous wheel-seat transitions &amp; UT scans</td>
+            </tr>
+            <tr>
+              <td class="mono-cell">03</td>
+              <td><strong>Aircraft Landing Gear</strong></td>
+              <td>High impact touchdown and runway shudder</td>
+              <td>Shot peened vacuum-melt alloy steel</td>
+            </tr>
+            <tr>
+              <td class="mono-cell">04</td>
+              <td><strong>Wind-Turbine Shaft</strong></td>
+              <td>Turbulent gust bending and low-speed torque</td>
+              <td>Forged oversized diameter with micro-alloys</td>
+            </tr>
+            <tr>
+              <td class="mono-cell">05</td>
+              <td><strong>Bicycle Crank Arm</strong></td>
+              <td>Repeated pedaling peak cantilever bending</td>
+              <td>Hollow-forged cross section &amp; shot peening</td>
+            </tr>
+            <tr>
+              <td class="mono-cell">06</td>
+              <td><strong>Hip Implant Stem</strong></td>
+              <td>Millions of walking cycles inside body</td>
+              <td>Mirror-polished titanium neck fillet</td>
+            </tr>
+          </tbody>
+        </table>
+
+        <!-- Inspection Strip -->
+        <div class="ndt-strip">
+          <div class="ndt-item">
+            <div class="ndt-title">DYE PENETRANT (PT)</div>
+            <div>Capillary action draws bright colored liquid into surface-breaking cracks for direct visual inspection.</div>
+          </div>
+          <div class="ndt-item">
+            <div class="ndt-title">MAGNETIC PARTICLE (MT)</div>
+            <div>Magnetic leakage flux traps fine ferromagnetic particles along surface and near-surface cracks in steel.</div>
+          </div>
+          <div class="ndt-item">
+            <div class="ndt-title">ULTRASONIC TESTING (UT)</div>
+            <div>High-frequency acoustic echo reflections detect deep internal flaws, inclusions, and subsurface crack depth.</div>
+          </div>
+        </div>
+
+        <!-- Student Conclusions -->
+        <div class="conclusions-box">
+          <strong style="font-family:var(--font-heading);font-size:14px;color:var(--graphite);text-transform:uppercase;">Student Lab Conclusion:</strong>
+          <p>We tested and proved that fatigue breaks rotating shafts well below yield strength. Notches, surface roughness, and shaft diameter dictate operational life far more than alloy tensile strength alone. Simple engineering fixes—especially generous fillet radii and modest diameter increases—reliably turn rapid failures into infinite life.</p>
+        </div>
+
+        <div class="sheet-joke">
+          <strong>FINAL AXIOM:</strong> In static loading, steel forgives; in cyclic fatigue loading, steel remembers every single turn.
+        </div>
+
+        <!-- Sources -->
+        <div class="sources-box">
+          <div><strong>REFERENCES:</strong></div>
+          <div>1. Shigley, J.E. &amp; Mischke, C.R. &mdash; <em>Mechanical Engineering Design</em>, 11th Metric Edition, McGraw-Hill (Basquin S-N formulations).</div>
+          <div>2. Callister, W.D. &amp; Rethwisch, D.G. &mdash; <em>Materials Science and Engineering: An Introduction</em>, 10th Ed., Wiley (Endurance curves).</div>
+          <div>3. Historical Failure Investigation Archives: Rankine (1843 Versailles Axle), CAA (1955 Comet Fuselage), NOU (1981 Kielland Rig).</div>
+        </div>
+
+        <!-- Title-Block Table Footer -->
+        <table class="title-block-footer" aria-label="Official Title Block">
+          <tr>
+            <td colspan="3" class="tb-header-cell">PROJECT TITLE</td>
+            <td class="tb-header-cell">SUBJECT &amp; COURSE</td>
+            <td class="tb-header-cell">GROUP</td>
+            <td class="tb-header-cell">SHEET</td>
+          </tr>
+          <tr>
+            <td colspan="3">
+              <div class="tb-val" style="font-size:13px;letter-spacing:0.5px;">TIRED STEEL &mdash; WHY A SHAFT BREAKS BELOW ITS STRENGTH</div>
+              <div style="font-size:10px;color:var(--secondary);">FATIGUE FAILURE OF A ROTATING SHAFT UNDER CYCLIC REVERSED BENDING</div>
+            </td>
+            <td>
+              <div class="tb-val" style="font-size:11px;line-height:1.25;">INTRODUCTION TO MATERIAL SCIENCE AND ENGINEERING</div>
+              <div style="font-size:10px;color:var(--secondary);margin-top:2px;">COURSE CODE: ME2304L &bull; SY MECH DIV A</div>
+            </td>
+            <td>
+              <div class="tb-val" style="font-size:14px;color:var(--safety-orange);">GROUP 3</div>
+            </td>
+            <td>
+              <div class="tb-val">06 OF 06</div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="4" class="tb-header-cell">DRAWN BY (PROJECT TEAM &bull; PRN)</td>
+            <td colspan="2" class="tb-header-cell">COURSE COORDINATOR</td>
+          </tr>
+          <tr>
+            <td colspan="4">
+              <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px 16px;font-size:11px;">
+                <div>1. Yash Sharad Chaudhari &mdash; <strong>RBT25ME008</strong></div>
+                <div>2. Shubham Sunil Chavan &mdash; <strong>RBT25ME009</strong></div>
+                <div>3. Kedar Yogesh Chidrewar &mdash; <strong>RBT25ME010</strong></div>
+                <div>4. Maithili Swatej Deshmukh &mdash; <strong>RBT25ME012</strong></div>
+              </div>
+            </td>
+            <td colspan="2">
+              <div class="tb-val">Dr. Sagar Dhage</div>
+              <div style="font-size:10px;color:var(--secondary);">COURSE COORDINATOR &bull; APPROVED</div>
+            </td>
+          </tr>
+          <tr>
+            <td colspan="2" style="font-size:10px;color:var(--secondary);">SCALE: NTS</td>
+            <td colspan="2" style="font-size:10px;color:var(--secondary);">DATE: OCTOBER 2026</td>
+            <td colspan="2" style="font-size:10px;color:var(--safety-orange);font-weight:600;text-align:right;">
+              Educational model, not for real design
+            </td>
+          </tr>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ==========================================================================
+       JAVASCRIPT ARCHITECTURE
+       Order: ENGINE -> LAB SIM -> CRACK SIM -> FINDINGS -> UI HELPERS
+       ========================================================================== -->
+  <script>
+    /* ENGINE:START */
+    // Pure engineering functions and constants (no DOM, no window)
+    const MATERIALS = {
+      '1020': { name: 'AISI 1020 CD', Su: 470, isSteel: true },
+      '1045': { name: 'AISI 1045 CD', Su: 630, isSteel: true },
+      '4140': { name: 'AISI 4140 Q&T', Su: 1000, isSteel: true },
+      '6061': { name: 'Al 6061-T6', Su: 310, isSteel: false }
+    };
+
+    const SURFACES = {
+      'ground': { name: 'Ground', a: 1.58, b: -0.085 },
+      'machined': { name: 'Machined', a: 4.51, b: -0.265 },
+      'hot-rolled': { name: 'Hot-rolled', a: 57.7, b: -0.718 },
+      'as-forged': { name: 'As-forged', a: 272, b: -0.995 }
+    };
+
+    const NOTCHES = {
+      'smooth': { name: 'Smooth', Kt: 1.0 },
+      'fillet': { name: 'Round Fillet', Kt: 1.5 },
+      'keyway': { name: 'Keyway', Kt: 2.0 },
+      'shoulder': { name: 'Sharp Shoulder', Kt: 2.5 }
+    };
+
+    /**
+     * Core fatigue calculation engine for rotating shaft in fully reversed bending (R = -1)
+     * @param {Object} inputs - { matKey, surfKey, notchKey, F (N), L (m), d (mm), rpm }
+     * @returns {Object} Calculated moments, stresses, endurance limits, and life
+     */
+    function calcShaftEngine(inputs) {
+      const matKey = inputs.matKey || '1045';
+      const surfKey = inputs.surfKey || 'machined';
+      const notchKey = inputs.notchKey || 'fillet';
+      const F = Math.max(10, Number(inputs.F) || 1000);
+      const L = Math.max(0.05, Number(inputs.L) || 0.5);
+      const d = Math.max(2.8, Number(inputs.d) || 30);
+      const rpm = Math.max(1, Number(inputs.rpm) || 1500);
+
+      const mat = MATERIALS[matKey] || MATERIALS['1045'];
+      const surf = SURFACES[surfKey] || SURFACES['machined'];
+      const notch = NOTCHES[notchKey] || NOTCHES['fillet'];
+
+      // 1. Central load on simply supported shaft: M = F*L/4 (N*m)
+      const M = (F * L) / 4;
+
+      // 1b. Alternating bending stress: sigma_a = 32*M / (pi*d^3) with d in metres -> MPa
+      const d_m = d / 1000;
+      const sigma_a = (32 * M) / (Math.PI * Math.pow(d_m, 3)) / 1e6;
+
+      // 3. Surface factor ka = a * Su^b
+      const ka = surf.a * Math.pow(mat.Su, surf.b);
+
+      // 4. Size factor kb = 1.24*d^-0.107 (d <= 51 mm), or 1.51*d^-0.157 (d > 51 mm)
+      const kb = d <= 51 ? 1.24 * Math.pow(d, -0.107) : 1.51 * Math.pow(d, -0.157);
+
+      // 5. Endurance limit Se
+      // Steel: Se' = 0.5*Su, Se = ka*kb*Se'
+      // Aluminium: no true endurance limit; fatigue strength at 5e8 cycles = 0.3*Su*ka*kb
+      let Se = 0;
+      let Sf_al = 0;
+      if (mat.isSteel) {
+        const Se_prime = 0.5 * mat.Su;
+        Se = ka * kb * Se_prime;
+      } else {
+        Sf_al = 0.3 * mat.Su * ka * kb;
+        Se = Sf_al; // reference strength for safety factor
+      }
+
+      // 6. Notch sensitivity: Kf = 1 + q*(Kt-1), q = 0.8
+      const q = 0.8;
+      const Kf = 1 + q * (notch.Kt - 1);
+      const sigma_eff = Kf * sigma_a;
+
+      // 7. S-N line (Basquin, S = A * N^B)
+      // Steel: line through (1e3, 0.9*Su) and (1e6, Se), flat at Se beyond 1e6
+      // Aluminium: line through (1e3, 0.9*Su) and (5e8, Sf_al), continuing downward
+      let A = 0;
+      let B = 0;
+      let N = Infinity;
+      let isRunout = false;
+      let isOverload = false;
+
+      const S1 = 0.9 * mat.Su;
+
+      if (mat.isSteel) {
+        const S2 = Se;
+        B = Math.log10(S2 / S1) / 3; // (log10(1e6) - log10(1e3)) = 3
+        A = S1 / Math.pow(1e3, B);
+
+        if (sigma_eff <= Se) {
+          isRunout = true;
+          N = Infinity;
+        } else {
+          N = Math.pow(sigma_eff / A, 1 / B);
+          if (N < 1e3) {
+            isOverload = true;
+          }
+        }
+      } else {
+        const S2 = Sf_al;
+        const log5e8 = Math.log10(5e8);
+        B = Math.log10(S2 / S1) / (log5e8 - 3);
+        A = S1 / Math.pow(1e3, B);
+
+        N = Math.pow(sigma_eff / A, 1 / B);
+        if (N < 1e3) {
+          isOverload = true;
+        }
+      }
+
+      // 9. Hours = N / (rpm * 60)
+      const hours = isRunout ? Infinity : (N / (rpm * 60));
+
+      // Safety factor n = Se / sigma_eff
+      const safetyFactor = Se / sigma_eff;
+
+      return {
+        M,
+        sigma_a,
+        ka,
+        kb,
+        Se,
+        Kf,
+        sigma_eff,
+        A,
+        B,
+        N,
+        hours,
+        safetyFactor,
+        isRunout,
+        isOverload,
+        isSteel: mat.isSteel,
+        Su: mat.Su,
+        rpm
+      };
+    }
+
+    /**
+     * Paris Law Crack Propagation Model:
+     * Delta_K = 1.12 * sigma_eff * sqrt(pi * a)
+     * da/dN = C * (Delta_K)^3 with C = 6.9e-12
+     * a_c = (1/pi) * (50 / (1.12*sigma_eff))^2, capped at 0.5*d
+     * N = (2 / (C * (1.12*sigma_eff)^3 * pi^1.5)) * (a0^-0.5 - a_c^-0.5)
+     */
+    function calcCrackModel(sigma_eff, d_mm, a0_mm) {
+      const a0_m = Math.max(0.0001, (a0_mm || 1.0) / 1000);
+      const d_m = Math.max(0.005, (d_mm || 30) / 1000);
+      const C = 6.9e-12;
+      const KIC = 50; // MPa*sqrt(m)
+
+      const delta_K0 = 1.12 * sigma_eff * Math.sqrt(Math.PI * a0_m);
+      if (delta_K0 < 5) {
+        return {
+          status: 'NO_GROWTH',
+          msg: 'Crack does not grow (below threshold ΔKth = 5 MPa√m)',
+          a0_m,
+          ac_m: a0_m,
+          delta_K0,
+          N_total: Infinity
+        };
+      }
+
+      let ac_m = (1 / Math.PI) * Math.pow(KIC / (1.12 * sigma_eff), 2);
+      if (ac_m > 0.5 * d_m) {
+        ac_m = 0.5 * d_m;
+      }
+
+      if (ac_m <= a0_m) {
+        return {
+          status: 'OVERLOAD',
+          msg: 'Instant fracture (overload, flaw exceeds critical size)',
+          a0_m,
+          ac_m,
+          delta_K0,
+          N_total: 0
+        };
+      }
+
+      const denom = C * Math.pow(1.12 * sigma_eff, 3) * Math.pow(Math.PI, 1.5);
+      const N_total = (2 / denom) * (Math.pow(a0_m, -0.5) - Math.pow(ac_m, -0.5));
+
+      return {
+        status: 'GROWING',
+        a0_m,
+        ac_m,
+        delta_K0,
+        denom,
+        N_total: Math.max(1, N_total)
+      };
+    }
+    /* ENGINE:END */
+
+    /* Self-Test Runner when URL has ?test */
+    function runEngineSelfTest() {
+      console.info('=== STARTING TIRED STEEL ENGINE SELF-TEST (?test detected) ===');
+      
+      // Test (a): F=1000, L=0.5, d=30 -> sigma_a = 47.2 MPa (+/-0.2)
+      const resA = calcShaftEngine({ matKey:'1045', surfKey:'machined', notchKey:'smooth', F:1000, L:0.5, d:30, rpm:1000 });
+      const passA = Math.abs(resA.sigma_a - 47.2) <= 0.2;
+      console.info(`Check (a) sigma_a = ${resA.sigma_a.toFixed(2)} MPa (Target 47.2 +/- 0.2): ${passA ? 'PASS' : 'FAIL'}`);
+
+      // Test (b): AISI 1045, machined, d=30 -> Se = 222 MPa (+/-3)
+      const passB = Math.abs(resA.Se - 222) <= 3;
+      console.info(`Check (b) Se = ${resA.Se.toFixed(2)} MPa (Target 222 +/- 3): ${passB ? 'PASS' : 'FAIL'}`);
+
+      // Test (c): Gearbox preset -> life about 9.5e4 (8e4 to 1.1e5)
+      const resC = calcShaftEngine({ matKey:'1045', surfKey:'machined', notchKey:'keyway', F:3000, L:0.6, d:30, rpm:1500 });
+      const passC = resC.N >= 8e4 && resC.N <= 1.1e5;
+      console.info(`Check (c) Gearbox N = ${resC.N.toExponential(3)} (Target 8e4 to 1.1e5): ${passC ? 'PASS' : 'FAIL'}`);
+
+      // Test (d): Conveyor preset -> RUNOUT
+      const resD = calcShaftEngine({ matKey:'1020', surfKey:'machined', notchKey:'fillet', F:2000, L:0.8, d:40, rpm:60 });
+      const passD = resD.isRunout === true;
+      console.info(`Check (d) Conveyor runout = ${resD.isRunout} (Target true): ${passD ? 'PASS' : 'FAIL'}`);
+
+      // Test (e): Rough forged pump preset -> 1e5 to 4e5
+      const resE = calcShaftEngine({ matKey:'1045', surfKey:'as-forged', notchKey:'fillet', F:2500, L:0.8, d:35, rpm:1450 });
+      const passE = resE.N >= 1e5 && resE.N <= 4e5;
+      console.info(`Check (e) Pump shaft N = ${resE.N.toExponential(3)} (Target 1e5 to 4e5): ${passE ? 'PASS' : 'FAIL'}`);
+
+      // Test (f): Bicycle preset -> finite life between 1e6 and 1e7
+      const resF = calcShaftEngine({ matKey:'6061', surfKey:'machined', notchKey:'fillet', F:1200, L:0.15, d:17, rpm:120 });
+      const passF = resF.N >= 1e6 && resF.N <= 1e7;
+      console.info(`Check (f) Bicycle N = ${resF.N.toExponential(3)} (Target 1e6 to 1e7): ${passF ? 'PASS' : 'FAIL'}`);
+
+      console.info('=== ENGINE SELF-TEST COMPLETED ===');
+    }
+
+    if (window.location.search.includes('test')) {
+      runEngineSelfTest();
+    }
+
+    /* Number Formatting Helpers */
+    function formatScientific(n) {
+      if (!isFinite(n) || n === Infinity) return 'RUNOUT (&infin;)';
+      if (n < 1e3) return '< 1,000 cyc (OVERLOAD)';
+      const exp = Math.floor(Math.log10(n));
+      const mant = (n / Math.pow(10, exp)).toFixed(1);
+      return `${mant} &times; 10<sup>${exp}</sup>`;
+    }
+
+    function formatTimeHours(hours) {
+      if (!isFinite(hours) || hours === Infinity) return { val: 'RUNOUT', unit: '' };
+      if (hours < 0.05) return { val: (hours * 60).toFixed(1), unit: 'minutes' };
+      if (hours < 48) return { val: hours.toFixed(1), unit: 'hours' };
+      if (hours < 24 * 365) return { val: (hours / 24).toFixed(1), unit: 'days' };
+      return { val: (hours / (24 * 365)).toFixed(1), unit: 'years' };
+    }
+
+    /* ==========================================================================
+       LAB SIMULATION CONTROLLER (SHEET 03)
+       ========================================================================== */
+    const labState = {
+      preset: 'gearbox',
+      matKey: '1045',
+      surfKey: 'machined',
+      notchKey: 'keyway',
+      F: 3000,
+      L: 0.60,
+      d: 30,
+      rpm: 1500,
+      
+      isRunning: true,
+      isFailingRun: false,
+      failureProgress: 0,
+      failureDuration: 6.0,
+      hasFailed: false,
+      shakeTimer: 0,
+      
+      rotationAngle: 0,
+      accumulatedCycles: 0,
+      calc: null
+    };
+
+    // Preset configurations
+    const PRESETS = {
+      'conveyor': { F: 2000, L: 0.8, d: 40, matKey: '1020', surfKey: 'machined', notchKey: 'fillet', rpm: 60, name: 'Conveyor roller shaft (Runout)' },
+      'gearbox': { F: 3000, L: 0.6, d: 30, matKey: '1045', surfKey: 'machined', notchKey: 'keyway', rpm: 1500, name: 'Gearbox shaft (~1e5 cyc)' },
+      'pump': { F: 2500, L: 0.8, d: 35, matKey: '1045', surfKey: 'as-forged', notchKey: 'fillet', rpm: 1450, name: 'Rough forged pump shaft (~2e5 cyc)' },
+      'bicycle': { F: 1200, L: 0.15, d: 17, matKey: '6061', surfKey: 'machined', notchKey: 'fillet', rpm: 120, name: 'Bicycle axle (~4e6 cyc)' }
+    };
+
+    // Canvases
+    const canvasShaft = document.getElementById('canvas-shaft-side');
+    const ctxShaft = canvasShaft.getContext('2d');
+    const canvasCross = document.getElementById('canvas-cross-section');
+    const ctxCross = canvasCross.getContext('2d');
+    const canvasWave = document.getElementById('canvas-stress-wave');
+    const ctxWave = canvasWave.getContext('2d');
+    const canvasSn = document.getElementById('canvas-sn-chart');
+    const ctxSn = canvasSn.getContext('2d');
+    const canvasDial = document.getElementById('canvas-dial-gauge');
+    const ctxDial = canvasDial.getContext('2d');
+
+    // UI references
+    const odomReadout = document.getElementById('odometer-readout');
+    const odomSub = document.getElementById('odometer-sub');
+    const stampFailed = document.getElementById('stamp-failed');
+    const stampRunout = document.getElementById('stamp-runout');
+    const statusLed = document.getElementById('status-led');
+    const statusLedText = document.getElementById('status-led-text');
+    const btnRunPause = document.getElementById('btn-run-pause');
+    const btnRunFailure = document.getElementById('btn-run-failure');
+
+    function updateLabCalculations() {
+      labState.calc = calcShaftEngine({
+        matKey: labState.matKey,
+        surfKey: labState.surfKey,
+        notchKey: labState.notchKey,
+        F: labState.F,
+        L: labState.L,
+        d: labState.d,
+        rpm: labState.rpm
+      });
+
+      const c = labState.calc;
+
+      // Update numeric readouts
+      document.getElementById('out-m').textContent = c.M.toFixed(1);
+      document.getElementById('out-sigma-a').textContent = c.sigma_a.toFixed(1);
+      document.getElementById('out-sigma-eff').textContent = c.sigma_eff.toFixed(1);
+      document.getElementById('out-se').textContent = c.Se.toFixed(1);
+      document.getElementById('out-n').innerHTML = formatScientific(c.N);
+
+      const timeRes = formatTimeHours(c.hours);
+      document.getElementById('out-time').textContent = timeRes.val;
+      document.getElementById('out-time-unit').textContent = timeRes.unit;
+
+      // Update LED & Status
+      if (c.isRunout) {
+        statusLed.style.background = 'var(--safe-green)';
+        statusLedText.textContent = 'SAFE ZONE: RUNOUT (INFINITE LIFE)';
+        statusLedText.style.color = 'var(--safe-green)';
+        document.getElementById('sn-operating-status').textContent = 'INFINITE LIFE (RUNOUT)';
+      } else if (c.N > 1e5) {
+        statusLed.style.background = 'var(--warn-amber)';
+        statusLedText.textContent = 'FINITE LIFE: MARGINAL SERVICE';
+        statusLedText.style.color = 'var(--warn-amber)';
+        document.getElementById('sn-operating-status').textContent = 'FINITE CYCLES (> 10⁵)';
+      } else {
+        statusLed.style.background = 'var(--fail-red)';
+        statusLedText.textContent = 'DANGER: HIGH STRESS / SHORT LIFE';
+        statusLedText.style.color = 'var(--fail-red)';
+        document.getElementById('sn-operating-status').textContent = 'RAPID FAILURE (< 10⁵)';
+      }
+
+      // Update Live Calculation Strip
+      document.getElementById('cstep-m-sub').textContent = `${labState.F} × ${labState.L.toFixed(2)} / 4`;
+      document.getElementById('cstep-m-res').textContent = `${c.M.toFixed(1)} N•m`;
+
+      document.getElementById('cstep-sa-sub').textContent = `32×${c.M.toFixed(0)} / (π×${(labState.d/1000).toFixed(3)}³)`;
+      document.getElementById('cstep-sa-res').textContent = `${c.sigma_a.toFixed(1)} MPa`;
+
+      document.getElementById('cstep-kf-sub').textContent = `1 + 0.8×(${NOTCHES[labState.notchKey].Kt.toFixed(1)} - 1)`;
+      document.getElementById('cstep-kf-res').textContent = c.Kf.toFixed(2);
+
+      document.getElementById('cstep-seff-sub').textContent = `${c.Kf.toFixed(2)} × ${c.sigma_a.toFixed(1)}`;
+      document.getElementById('cstep-seff-res').textContent = `${c.sigma_eff.toFixed(1)} MPa`;
+
+      document.getElementById('cstep-se-sub').textContent = `${c.ka.toFixed(2)} × ${c.kb.toFixed(2)} × ${(c.isSteel ? 0.5*c.Su : 0.3*c.Su).toFixed(0)}`;
+      document.getElementById('cstep-se-res').textContent = `${c.Se.toFixed(1)} MPa`;
+
+      if (c.isRunout) {
+        document.getElementById('cstep-n-sub').textContent = `σeff (${c.sigma_eff.toFixed(1)}) ≤ Se (${c.Se.toFixed(1)})`;
+        document.getElementById('cstep-n-res').textContent = 'RUNOUT (∞)';
+      } else {
+        document.getElementById('cstep-n-sub').textContent = `(${c.sigma_eff.toFixed(1)} / ${c.A.toFixed(0)})^(1/${c.B.toFixed(2)})`;
+        document.getElementById('cstep-n-res').innerHTML = formatScientific(c.N);
+      }
+
+      // Sync stress with Crack Lab
+      document.getElementById('crack-sync-stress').textContent = `${c.sigma_eff.toFixed(1)} MPa`;
+      if (typeof updateCrackParameters === 'function') {
+        updateCrackParameters();
+      }
+
+      // Redraw static S-N curve
+      drawSnChart();
+      drawDialGauge();
+    }
+
+    /* HiDPI Canvas Resizing Helper */
+    function resizeCanvas(canvas, ctx, width, height) {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = width * dpr;
+      canvas.height = height * dpr;
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.scale(dpr, dpr);
+    }
+
+    function initCanvases() {
+      resizeCanvas(canvasShaft, ctxShaft, canvasShaft.clientWidth || 680, 160);
+      resizeCanvas(canvasCross, ctxCross, canvasCross.clientWidth || 280, 140);
+      resizeCanvas(canvasWave, ctxWave, canvasWave.clientWidth || 380, 140);
+      resizeCanvas(canvasSn, ctxSn, canvasSn.clientWidth || 480, 160);
+      resizeCanvas(canvasDial, ctxDial, canvasDial.clientWidth || 220, 110);
+    }
+
+    // SHAFT SIDE VIEW ANIMATION
+    let shaftParticles = [];
+
+    function drawShaftSideView(dt) {
+      const w = canvasShaft.clientWidth || 680;
+      const h = 160;
+      ctxShaft.clearRect(0, 0, w, h);
+
+      // Faint graph paper background in canvas
+      ctxShaft.strokeStyle = 'rgba(31,35,40,0.05)';
+      ctxShaft.lineWidth = 1;
+      for (let x = 0; x < w; x += 16) {
+        ctxShaft.beginPath(); ctxShaft.moveTo(x, 0); ctxShaft.lineTo(x, h); ctxShaft.stroke();
+      }
+      for (let y = 0; y < h; y += 16) {
+        ctxShaft.beginPath(); ctxShaft.moveTo(0, y); ctxShaft.lineTo(w, y); ctxShaft.stroke();
+      }
+
+      const bearingLeft = 70;
+      const bearingRight = w - 70;
+      const span = bearingRight - bearingLeft;
+      const centerY = 80;
+
+      // Draw bearing supports (mechanical drawing style)
+      function drawBearing(bx, by) {
+        ctxShaft.fillStyle = '#FFFFFF';
+        ctxShaft.strokeStyle = '#1F2328';
+        ctxShaft.lineWidth = 1.5;
+        // Bearing pedestal triangle/block
+        ctxShaft.beginPath();
+        ctxShaft.moveTo(bx - 18, by + 40);
+        ctxShaft.lineTo(bx + 18, by + 40);
+        ctxShaft.lineTo(bx + 12, by);
+        ctxShaft.lineTo(bx - 12, by);
+        ctxShaft.closePath();
+        ctxShaft.fill();
+        ctxShaft.stroke();
+        // Bearing inner housing
+        ctxShaft.strokeRect(bx - 10, by - 16, 20, 32);
+        // Ground hatch
+        ctxShaft.beginPath();
+        ctxShaft.moveTo(bx - 24, by + 40);
+        ctxShaft.lineTo(bx + 24, by + 40);
+        ctxShaft.stroke();
+        for (let i = -20; i <= 20; i += 8) {
+          ctxShaft.beginPath();
+          ctxShaft.moveTo(bx + i, by + 40);
+          ctxShaft.lineTo(bx + i - 6, by + 48);
+          ctxShaft.stroke();
+        }
+      }
+
+      drawBearing(bearingLeft, centerY);
+      drawBearing(bearingRight, centerY);
+
+      // Exaggerated deflection calculation
+      // delta = F * L^3 / (48 * E * I) scaled visually
+      const c = labState.calc || { sigma_a: 100, Kf: 1.5 };
+      const maxDeflection = Math.min(22, 4 + (labState.F / 5000) * 16);
+      const shaftThickness = Math.min(28, Math.max(12, labState.d * 0.55));
+      const midX = (bearingLeft + bearingRight) / 2;
+
+      // Handle shaft snapping in Run to Failure
+      if (labState.hasFailed) {
+        // Left half
+        ctxShaft.save();
+        ctxShaft.translate(bearingLeft, centerY);
+        ctxShaft.rotate(0.08);
+        drawShaftSegment(0, -shaftThickness/2, span/2 - 4, shaftThickness, true);
+        ctxShaft.restore();
+
+        // Right half
+        ctxShaft.save();
+        ctxShaft.translate(bearingRight, centerY);
+        ctxShaft.rotate(-0.08);
+        drawShaftSegment(-(span/2 - 4), -shaftThickness/2, span/2 - 4, shaftThickness, false);
+        ctxShaft.restore();
+
+        // Flying fragment particles
+        for (let p of shaftParticles) {
+          ctxShaft.fillStyle = '#F26B21';
+          ctxShaft.fillRect(p.x, p.y, p.size, p.size);
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.15; // gravity
+        }
+      } else {
+        // Continuous bent shaft
+        ctxShaft.save();
+
+        // Screen shake if failing
+        if (labState.shakeTimer > 0) {
+          const sx = (Math.random() - 0.5) * 6;
+          const sy = (Math.random() - 0.5) * 6;
+          ctxShaft.translate(sx, sy);
+          labState.shakeTimer -= dt;
+        }
+
+        // Draw shaft body with deflection curve
+        ctxShaft.beginPath();
+        // Top edge
+        ctxShaft.moveTo(bearingLeft - 20, centerY - shaftThickness/2);
+        ctxShaft.quadraticCurveTo(midX, centerY + maxDeflection - shaftThickness/2, bearingRight + 20, centerY - shaftThickness/2);
+        // Right end
+        ctxShaft.lineTo(bearingRight + 20, centerY + shaftThickness/2);
+        // Bottom edge
+        ctxShaft.quadraticCurveTo(midX, centerY + maxDeflection + shaftThickness/2, bearingLeft - 20, centerY + shaftThickness/2);
+        ctxShaft.closePath();
+
+        // Steel body fill
+        ctxShaft.fillStyle = '#FFFFFF';
+        ctxShaft.fill();
+        ctxShaft.strokeStyle = '#1F2328';
+        ctxShaft.lineWidth = 1.5;
+        ctxShaft.stroke();
+
+        // Tension (Orange) top fibre and Compression (Blue) bottom fibre shading
+        const stressRatio = Math.min(1.0, c.sigma_a / 300);
+        
+        // Top tension tint
+        ctxShaft.fillStyle = `rgba(242, 107, 33, ${0.15 + 0.55 * stressRatio})`;
+        ctxShaft.beginPath();
+        ctxShaft.moveTo(bearingLeft - 18, centerY - shaftThickness/2);
+        ctxShaft.quadraticCurveTo(midX, centerY + maxDeflection - shaftThickness/2, bearingRight + 18, centerY - shaftThickness/2);
+        ctxShaft.quadraticCurveTo(midX, centerY + maxDeflection - shaftThickness/6, bearingLeft - 18, centerY - shaftThickness/6);
+        ctxShaft.closePath();
+        ctxShaft.fill();
+
+        // Bottom compression tint
+        ctxShaft.fillStyle = `rgba(43, 92, 138, ${0.15 + 0.55 * stressRatio})`;
+        ctxShaft.beginPath();
+        ctxShaft.moveTo(bearingLeft - 18, centerY + shaftThickness/2);
+        ctxShaft.quadraticCurveTo(midX, centerY + maxDeflection + shaftThickness/2, bearingRight + 18, centerY + shaftThickness/2);
+        ctxShaft.quadraticCurveTo(midX, centerY + maxDeflection + shaftThickness/6, bearingLeft - 18, centerY + shaftThickness/6);
+        ctxShaft.closePath();
+        ctxShaft.fill();
+
+        // Moving surface tick marks to demonstrate visual rotation
+        const tickSpacing = 32;
+        const offset = (labState.rotationAngle * 10) % tickSpacing;
+        ctxShaft.strokeStyle = 'rgba(31,35,40,0.4)';
+        ctxShaft.lineWidth = 1.5;
+        for (let tx = bearingLeft + offset; tx < bearingRight; tx += tickSpacing) {
+          const tRel = (tx - bearingLeft) / span;
+          const ty = centerY + maxDeflection * Math.sin(tRel * Math.PI);
+          ctxShaft.beginPath();
+          ctxShaft.moveTo(tx, ty - shaftThickness/2 + 2);
+          ctxShaft.lineTo(tx, ty + shaftThickness/2 - 2);
+          ctxShaft.stroke();
+        }
+
+        // Notch at midspan
+        const notchType = labState.notchKey;
+        const notchKt = NOTCHES[notchType].Kt;
+        ctxShaft.fillStyle = notchKt > 1.8 ? '#F26B21' : (notchKt > 1.2 ? '#D97706' : '#2B5C8A');
+        
+        const midY = centerY + maxDeflection;
+        if (notchType === 'fillet') {
+          ctxShaft.beginPath();
+          ctxShaft.arc(midX, midY - shaftThickness/2 + 2, 4, 0, Math.PI * 2);
+          ctxShaft.fill();
+        } else if (notchType === 'keyway') {
+          ctxShaft.fillRect(midX - 4, midY - shaftThickness/2 - 1, 8, 6);
+        } else if (notchType === 'shoulder') {
+          ctxShaft.fillRect(midX - 2, midY - shaftThickness/2 - 2, 4, 8);
+        }
+
+        ctxShaft.restore();
+      }
+
+      // Load Arrow F at center
+      const arrowY = centerY + (labState.hasFailed ? 25 : maxDeflection);
+      ctxShaft.strokeStyle = '#F26B21';
+      ctxShaft.fillStyle = '#F26B21';
+      ctxShaft.lineWidth = 2.5;
+      ctxShaft.beginPath();
+      ctxShaft.moveTo(midX, arrowY - 45);
+      ctxShaft.lineTo(midX, arrowY - shaftThickness/2 - 6);
+      ctxShaft.stroke();
+      // Arrowhead
+      ctxShaft.beginPath();
+      ctxShaft.moveTo(midX - 6, arrowY - shaftThickness/2 - 14);
+      ctxShaft.lineTo(midX + 6, arrowY - shaftThickness/2 - 14);
+      ctxShaft.lineTo(midX, arrowY - shaftThickness/2 - 4);
+      ctxShaft.closePath();
+      ctxShaft.fill();
+
+      // Dimension Callouts & Text
+      ctxShaft.font = '600 11px "Overpass Mono", monospace';
+      ctxShaft.fillStyle = '#F26B21';
+      ctxShaft.fillText(`F = ${labState.F} N`, midX + 10, arrowY - 30);
+
+      ctxShaft.font = '600 10px "Overpass Mono", monospace';
+      ctxShaft.fillStyle = '#2B5C8A';
+      ctxShaft.fillText(`deflection ×500`, midX - 44, arrowY + shaftThickness/2 + 18);
+    }
+
+    function drawShaftSegment(x, y, w, h, isLeft) {
+      ctxShaft.fillStyle = '#FFF';
+      ctxShaft.strokeStyle = '#1F2328';
+      ctxShaft.lineWidth = 1.5;
+      ctxShaft.fillRect(x, y, w, h);
+      ctxShaft.strokeRect(x, y, w, h);
+      // Fracture ragged face
+      ctxShaft.fillStyle = '#F26B21';
+      ctxShaft.fillRect(isLeft ? x + w - 3 : x, y, 3, h);
+    }
+
+    // CROSS SECTION STRESS MAP & ROTATING MATERIAL POINT
+    function drawCrossSection() {
+      const w = canvasCross.clientWidth || 280;
+      const h = 140;
+      ctxCross.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2;
+      const radius = 46;
+
+      // Shaft circle perimeter
+      ctxCross.save();
+      ctxCross.beginPath();
+      ctxCross.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctxCross.clip();
+
+      // Stationary spatial stress gradient (Orange tension on top, Blue compression on bottom)
+      const grad = ctxCross.createLinearGradient(cx, cy - radius, cx, cy + radius);
+      grad.addColorStop(0, '#F26B21');      // Max tension
+      grad.addColorStop(0.48, 'rgba(255,255,255,0.9)');
+      grad.addColorStop(0.52, 'rgba(255,255,255,0.9)'); // Neutral axis
+      grad.addColorStop(1, '#2B5C8A');      // Max compression
+
+      ctxCross.fillStyle = grad;
+      ctxCross.fillRect(cx - radius, cy - radius, radius * 2, radius * 2);
+
+      // Neutral axis line
+      ctxCross.strokeStyle = '#1F2328';
+      ctxCross.lineWidth = 1;
+      ctxCross.setLineDash([3, 2]);
+      ctxCross.beginPath();
+      ctxCross.moveTo(cx - radius, cy);
+      ctxCross.lineTo(cx + radius, cy);
+      ctxCross.stroke();
+      ctxCross.setLineDash([]);
+
+      ctxCross.restore();
+
+      // Outer circle border
+      ctxCross.strokeStyle = '#1F2328';
+      ctxCross.lineWidth = 2;
+      ctxCross.beginPath();
+      ctxCross.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctxCross.stroke();
+
+      // Rotating material dot tracking the cycle
+      const angle = labState.rotationAngle;
+      const dotX = cx + (radius - 5) * Math.sin(angle);
+      const dotY = cy - (radius - 5) * Math.cos(angle);
+
+      ctxCross.fillStyle = '#FFFFFF';
+      ctxCross.strokeStyle = '#1F2328';
+      ctxCross.lineWidth = 2;
+      ctxCross.beginPath();
+      ctxCross.arc(dotX, dotY, 5.5, 0, Math.PI * 2);
+      ctxCross.fill();
+      ctxCross.stroke();
+
+      ctxCross.fillStyle = dotY < cy ? '#F26B21' : '#2B5C8A';
+      ctxCross.beginPath();
+      ctxCross.arc(dotX, dotY, 2.5, 0, Math.PI * 2);
+      ctxCross.fill();
+
+      // Static field labels
+      ctxCross.font = '600 9px "Overpass Mono", monospace';
+      ctxCross.fillStyle = '#F26B21';
+      ctxCross.fillText('+TENSION', cx + radius + 6, cy - radius/2);
+      ctxCross.fillStyle = '#2B5C8A';
+      ctxCross.fillText('-COMPRESSION', cx + radius + 6, cy + radius/2);
+      ctxCross.fillStyle = '#6B7380';
+      ctxCross.fillText('σ=0 NEUTRAL', cx - radius - 64, cy + 3);
+    }
+
+    // LIVE STRESS SINE WAVE CHART
+    let waveHistory = [];
+    const MAX_WAVE_POINTS = 140;
+
+    function drawStressWave() {
+      const w = canvasWave.clientWidth || 380;
+      const h = 140;
+      ctxWave.clearRect(0, 0, w, h);
+
+      const c = labState.calc || { sigma_eff: 200, Se: 220 };
+      const cy = h / 2;
+      const scaleY = (h * 0.38) / Math.max(350, c.sigma_eff * 1.15, c.Se * 1.15);
+
+      // Background grid
+      ctxWave.strokeStyle = 'rgba(31,35,40,0.06)';
+      ctxWave.lineWidth = 1;
+      for (let y = 10; y < h; y += 24) {
+        ctxWave.beginPath(); ctxWave.moveTo(0, y); ctxWave.lineTo(w, y); ctxWave.stroke();
+      }
+
+      // Zero baseline
+      ctxWave.strokeStyle = '#1F2328';
+      ctxWave.lineWidth = 1;
+      ctxWave.beginPath();
+      ctxWave.moveTo(0, cy);
+      ctxWave.lineTo(w, cy);
+      ctxWave.stroke();
+
+      // Dashed lines for +Se and -Se (Endurance limit)
+      const seY1 = cy - c.Se * scaleY;
+      const seY2 = cy + c.Se * scaleY;
+      ctxWave.strokeStyle = '#2B5C8A';
+      ctxWave.lineWidth = 1.2;
+      ctxWave.setLineDash([4, 3]);
+      ctxWave.beginPath(); ctxWave.moveTo(0, seY1); ctxWave.lineTo(w, seY1); ctxWave.stroke();
+      ctxWave.beginPath(); ctxWave.moveTo(0, seY2); ctxWave.lineTo(w, seY2); ctxWave.stroke();
+
+      // Dashed lines for +sigma_eff and -sigma_eff
+      const sigY1 = cy - c.sigma_eff * scaleY;
+      const sigY2 = cy + c.sigma_eff * scaleY;
+      ctxWave.strokeStyle = '#F26B21';
+      ctxWave.lineWidth = 1.2;
+      ctxWave.setLineDash([2, 2]);
+      ctxWave.beginPath(); ctxWave.moveTo(0, sigY1); ctxWave.lineTo(w, sigY1); ctxWave.stroke();
+      ctxWave.beginPath(); ctxWave.moveTo(0, sigY2); ctxWave.lineTo(w, sigY2); ctxWave.stroke();
+      ctxWave.setLineDash([]);
+
+      // Append current wave point
+      const currentStress = c.sigma_eff * Math.sin(labState.rotationAngle);
+      waveHistory.push(currentStress);
+      if (waveHistory.length > MAX_WAVE_POINTS) {
+        waveHistory.shift();
+      }
+
+      // Draw sine wave line
+      if (waveHistory.length > 1) {
+        ctxWave.strokeStyle = '#1F2328';
+        ctxWave.lineWidth = 2;
+        ctxWave.beginPath();
+        for (let i = 0; i < waveHistory.length; i++) {
+          const x = (i / MAX_WAVE_POINTS) * (w - 20);
+          const y = cy - waveHistory[i] * scaleY;
+          if (i === 0) ctxWave.moveTo(x, y);
+          else ctxWave.lineTo(x, y);
+        }
+        ctxWave.stroke();
+
+        // Current tracking dot on wave
+        const lastX = ((waveHistory.length - 1) / MAX_WAVE_POINTS) * (w - 20);
+        const lastY = cy - waveHistory[waveHistory.length - 1] * scaleY;
+        ctxWave.fillStyle = '#F26B21';
+        ctxWave.beginPath();
+        ctxWave.arc(lastX, lastY, 4, 0, Math.PI * 2);
+        ctxWave.fill();
+      }
+
+      // Labels
+      ctxWave.font = '600 9px "Overpass Mono", monospace';
+      ctxWave.fillStyle = '#2B5C8A';
+      ctxWave.fillText(`+Se (${c.Se.toFixed(0)})`, w - 55, seY1 - 2);
+      ctxWave.fillStyle = '#F26B21';
+      ctxWave.fillText(`+σeff (${c.sigma_eff.toFixed(0)})`, w - 75, sigY1 - 2);
+    }
+
+    // LOG-LOG S-N CHART WITH GLIDING OPERATING POINT
+    function drawSnChart() {
+      const w = canvasSn.clientWidth || 480;
+      const h = 160;
+      ctxSn.clearRect(0, 0, w, h);
+
+      const padL = 45;
+      const padR = 25;
+      const padT = 18;
+      const padB = 26;
+      const plotW = w - padL - padR;
+      const plotH = h - padT - padB;
+
+      // Log-log domain: N from 1e3 to 1e8; Stress from 0 to 1.1*Su (or max 1100)
+      const c = labState.calc || { Su: 630, Se: 222, A: 1448, B: -0.136, isSteel: true, sigma_eff: 305, N: 9.5e4 };
+      const maxStress = Math.max(800, c.Su * 1.15);
+
+      function xToPixel(cycles) {
+        const logMin = 3; // 10^3
+        const logMax = 8; // 10^8
+        const logVal = Math.log10(Math.max(1e3, Math.min(1e8, cycles)));
+        return padL + ((logVal - logMin) / (logMax - logMin)) * plotW;
+      }
+
+      function yToPixel(stress) {
+        return padT + plotH - (Math.max(0, Math.min(maxStress, stress)) / maxStress) * plotH;
+      }
+
+      // Grid lines
+      ctxSn.strokeStyle = 'rgba(31,35,40,0.08)';
+      ctxSn.lineWidth = 1;
+      ctxSn.font = '500 9px "Overpass Mono", monospace';
+      ctxSn.fillStyle = '#6B7380';
+
+      for (let exp = 3; exp <= 8; exp++) {
+        const gx = xToPixel(Math.pow(10, exp));
+        ctxSn.beginPath(); ctxSn.moveTo(gx, padT); ctxSn.lineTo(gx, padT + plotH); ctxSn.stroke();
+        ctxSn.fillText(`10${exp === 3?'³':exp===4?'⁴':exp===5?'⁵':exp===6?'⁶':exp===7?'⁷':'⁸'}`, gx - 8, padT + plotH + 14);
+      }
+
+      for (let s = 200; s <= maxStress; s += 200) {
+        const gy = yToPixel(s);
+        ctxSn.beginPath(); ctxSn.moveTo(padL, gy); ctxSn.lineTo(padL + plotW, gy); ctxSn.stroke();
+        ctxSn.fillText(String(s), padL - 26, gy + 3);
+      }
+
+      // Axis lines
+      ctxSn.strokeStyle = '#1F2328';
+      ctxSn.lineWidth = 1.5;
+      ctxSn.beginPath();
+      ctxSn.moveTo(padL, padT);
+      ctxSn.lineTo(padL, padT + plotH);
+      ctxSn.lineTo(padL + plotW, padT + plotH);
+      ctxSn.stroke();
+
+      // S-N Curve Path
+      ctxSn.strokeStyle = '#2B5C8A';
+      ctxSn.lineWidth = 2.5;
+      ctxSn.beginPath();
+
+      const S1 = 0.9 * c.Su;
+      const xStart = xToPixel(1e3);
+      const yStart = yToPixel(S1);
+      ctxSn.moveTo(xStart, yStart);
+
+      if (c.isSteel) {
+        // Drop from 1e3 to 1e6
+        const xKnee = xToPixel(1e6);
+        const yKnee = yToPixel(c.Se);
+        ctxSn.lineTo(xKnee, yKnee);
+        // Flat plateau out to 1e8
+        const xEnd = xToPixel(1e8);
+        ctxSn.lineTo(xEnd, yKnee);
+      } else {
+        // Continuous drop
+        const xEnd = xToPixel(5e8);
+        const yEnd = yToPixel(c.Se);
+        ctxSn.lineTo(xEnd, yEnd);
+      }
+      ctxSn.stroke();
+
+      // Dashed horizontal line at sigma_eff
+      const sigEffY = yToPixel(c.sigma_eff);
+      ctxSn.strokeStyle = '#F26B21';
+      ctxSn.lineWidth = 1.2;
+      ctxSn.setLineDash([3, 2]);
+      ctxSn.beginPath();
+      ctxSn.moveTo(padL, sigEffY);
+      ctxSn.lineTo(padL + plotW, sigEffY);
+      ctxSn.stroke();
+      ctxSn.setLineDash([]);
+
+      // Gliding intersection point
+      let operX = 0;
+      let operY = sigEffY;
+
+      if (c.isRunout) {
+        operX = xToPixel(5e6); // Safe zone on plateau
+        operY = yToPixel(c.Se);
+      } else {
+        operX = xToPixel(c.N);
+      }
+
+      ctxSn.fillStyle = '#FFFFFF';
+      ctxSn.strokeStyle = c.isRunout ? '#2B5C8A' : '#F26B21';
+      ctxSn.lineWidth = 2.5;
+      ctxSn.beginPath();
+      ctxSn.arc(operX, operY, 6, 0, Math.PI * 2);
+      ctxSn.fill();
+      ctxSn.stroke();
+
+      ctxSn.fillStyle = c.isRunout ? '#2B5C8A' : '#F26B21';
+      ctxSn.beginPath();
+      ctxSn.arc(operX, operY, 2.5, 0, Math.PI * 2);
+      ctxSn.fill();
+
+      // Operating point label
+      ctxSn.font = '600 10px "Overpass Mono", monospace';
+      if (c.isRunout) {
+        ctxSn.fillStyle = '#2B5C8A';
+        ctxSn.fillText('OPERATING POINT &infin; (RUNOUT)', padL + 10, padT + 16);
+      } else {
+        ctxSn.fillStyle = '#F26B21';
+        ctxSn.fillText(`OPERATING: N = ${c.N.toExponential(1)}`, operX - 40, operY - 10);
+      }
+    }
+
+    // MECHANICAL DIAL GAUGE (Safety factor n)
+    function drawDialGauge() {
+      const w = canvasDial.clientWidth || 220;
+      const h = 110;
+      ctxDial.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h - 14;
+      const radius = 68;
+
+      const c = labState.calc || { safetyFactor: 1.0 };
+      const n = Math.max(0, Math.min(3.0, c.safetyFactor || 0));
+
+      // Dial Arc: from Math.PI (left) to 0 (right)
+      // Range: n = 0 to 3.0
+      function nToAngle(val) {
+        return Math.PI + (val / 3.0) * Math.PI;
+      }
+
+      // Red zone (0 to 1.0)
+      ctxDial.strokeStyle = '#DC2626';
+      ctxDial.lineWidth = 7;
+      ctxDial.beginPath();
+      ctxDial.arc(cx, cy, radius, nToAngle(0), nToAngle(1.0));
+      ctxDial.stroke();
+
+      // Amber zone (1.0 to 1.5)
+      ctxDial.strokeStyle = '#D97706';
+      ctxDial.lineWidth = 7;
+      ctxDial.beginPath();
+      ctxDial.arc(cx, cy, radius, nToAngle(1.0), nToAngle(1.5));
+      ctxDial.stroke();
+
+      // Green zone (1.5 to 3.0)
+      ctxDial.strokeStyle = '#2E7D32';
+      ctxDial.lineWidth = 7;
+      ctxDial.beginPath();
+      ctxDial.arc(cx, cy, radius, nToAngle(1.5), nToAngle(3.0));
+      ctxDial.stroke();
+
+      // Dial Tick Marks
+      ctxDial.strokeStyle = '#1F2328';
+      ctxDial.lineWidth = 1;
+      for (let v = 0; v <= 3.0; v += 0.5) {
+        const ang = nToAngle(v);
+        const tx1 = cx + (radius - 5) * Math.cos(ang);
+        const ty1 = cy + (radius - 5) * Math.sin(ang);
+        const tx2 = cx + (radius + 5) * Math.cos(ang);
+        const ty2 = cy + (radius + 5) * Math.sin(ang);
+        ctxDial.beginPath(); ctxDial.moveTo(tx1, ty1); ctxDial.lineTo(tx2, ty2); ctxDial.stroke();
+      }
+
+      // Needle
+      const needleAng = nToAngle(n);
+      ctxDial.strokeStyle = '#1F2328';
+      ctxDial.lineWidth = 2.5;
+      ctxDial.beginPath();
+      ctxDial.moveTo(cx, cy);
+      ctxDial.lineTo(cx + (radius - 8) * Math.cos(needleAng), cy + (radius - 8) * Math.sin(needleAng));
+      ctxDial.stroke();
+
+      // Center pivot
+      ctxDial.fillStyle = '#FFFFFF';
+      ctxDial.strokeStyle = '#1F2328';
+      ctxDial.lineWidth = 2;
+      ctxDial.beginPath();
+      ctxDial.arc(cx, cy, 6, 0, Math.PI * 2);
+      ctxDial.fill();
+      ctxDial.stroke();
+
+      // Numeric readout in dial center
+      ctxDial.font = '700 12px "Overpass Mono", monospace';
+      ctxDial.fillStyle = n >= 1.5 ? '#2E7D32' : (n >= 1.0 ? '#D97706' : '#DC2626');
+      ctxDial.textAlign = 'center';
+      ctxDial.fillText(`n = ${c.safetyFactor > 20 ? '> 20' : c.safetyFactor.toFixed(2)}`, cx, cy - 24);
+      ctxDial.textAlign = 'start';
+    }
+
+    // RUN TO FAILURE SEQUENCE
+    function triggerRunToFailure() {
+      if (labState.isFailingRun) return;
+
+      labState.isFailingRun = true;
+      labState.failureProgress = 0;
+      labState.hasFailed = false;
+      stampFailed.classList.remove('stamp-visible');
+      stampRunout.classList.remove('stamp-visible');
+      shaftParticles = [];
+
+      odomSub.textContent = 'ACCELERATING (LOG SCALE)';
+      btnRunFailure.disabled = true;
+      btnRunFailure.textContent = 'RUNNING TEST...';
+    }
+
+    function resetLabState() {
+      labState.isFailingRun = false;
+      labState.hasFailed = false;
+      labState.failureProgress = 0;
+      labState.accumulatedCycles = 0;
+      stampFailed.classList.remove('stamp-visible');
+      stampRunout.classList.remove('stamp-visible');
+      odomReadout.textContent = '00000000';
+      odomSub.textContent = 'NORMAL SPEED';
+      btnRunFailure.disabled = false;
+      btnRunFailure.textContent = 'RUN TO FAILURE';
+      updateLabCalculations();
+    }
+
+    // MAIN ANIMATION LOOP
+    let lastTime = performance.now();
+    let isLabInView = true;
+
+    function mainAnimationLoop(currentTime) {
+      const dt = Math.min(0.1, (currentTime - lastTime) / 1000);
+      lastTime = currentTime;
+
+      if (isLabInView && (labState.isRunning || labState.isFailingRun)) {
+        // Update rotation angle
+        const visualSpeed = 3.5; // readable constant speed
+        labState.rotationAngle += visualSpeed * dt;
+
+        // Normal cycling
+        if (!labState.isFailingRun) {
+          labState.accumulatedCycles += Math.floor(labState.rpm * 4 * dt);
+          const odomStr = String(Math.floor(labState.accumulatedCycles)).padStart(8, '0');
+          odomReadout.textContent = odomStr;
+        } else {
+          // Accelerated logarithmic progression over 6 seconds
+          labState.failureProgress += dt / labState.failureDuration;
+          const c = labState.calc;
+          const targetN = c.isRunout ? 1e7 : Math.min(1e7, c.N);
+          const currentLog = 3 + labState.failureProgress * (Math.log10(targetN) - 3);
+          const currentCycles = Math.min(targetN, Math.pow(10, currentLog));
+
+          odomReadout.textContent = String(Math.floor(currentCycles)).padStart(8, '0');
+
+          if (labState.failureProgress >= 1.0) {
+            labState.isFailingRun = false;
+            btnRunFailure.disabled = false;
+            btnRunFailure.textContent = 'RUN TO FAILURE';
+
+            if (c.isRunout) {
+              stampRunout.classList.add('stamp-visible');
+              odomSub.textContent = 'RUNOUT AT 10⁷ CYCLES';
+            } else {
+              labState.hasFailed = true;
+              labState.shakeTimer = 0.3; // 300 ms screen shake
+              stampFailed.classList.add('stamp-visible');
+              odomSub.textContent = 'FRACTURE FAILURE';
+
+              // Generate fracture fragments
+              const midX = (canvasShaft.clientWidth || 680) / 2;
+              shaftParticles = [];
+              for (let i = 0; i < 16; i++) {
+                shaftParticles.push({
+                  x: midX + (Math.random() - 0.5) * 8,
+                  y: 80 + (Math.random() - 0.5) * 12,
+                  vx: (Math.random() - 0.5) * 6,
+                  vy: -Math.random() * 4 - 1,
+                  size: 2 + Math.random() * 3
+                });
+              }
+            }
+          }
+        }
+
+        drawShaftSideView(dt);
+        drawCrossSection();
+        drawStressWave();
+      }
+
+      requestAnimationFrame(mainAnimationLoop);
+    }
+
+    /* ==========================================================================
+       CRACK GROWTH SIMULATION (SHEET 04)
+       ========================================================================== */
+    const crackState = {
+      a0_mm: 1.0,
+      current_a: 1.0,
+      elapsedCycles: 0,
+      isPlaying: false,
+      speed: 1, // 1x or 4x
+      beachMarks: [], // array of crack depths where beach mark lines are drawn
+      model: null
+    };
+
+    const canvasCrack = document.getElementById('canvas-crack-front');
+    const ctxCrack = canvasCrack.getContext('2d');
+    const canvasCrackChart = document.getElementById('canvas-crack-chart');
+    const ctxCrackChart = canvasCrackChart.getContext('2d');
+
+    function updateCrackParameters() {
+      const sigma_eff = labState.calc ? labState.calc.sigma_eff : 305.6;
+      const d_mm = labState.d || 30;
+      crackState.model = calcCrackModel(sigma_eff, d_mm, crackState.a0_mm);
+
+      // Reset crack to beginning
+      crackState.current_a = crackState.a0_mm;
+      crackState.elapsedCycles = 0;
+      crackState.beachMarks = [crackState.a0_mm];
+
+      drawCrackCrossSection();
+      drawCrackChart();
+      updateCrackReadouts();
+    }
+
+    function updateCrackReadouts() {
+      const sigma_eff = labState.calc ? labState.calc.sigma_eff : 305.6;
+      const a_m = crackState.current_a / 1000;
+      const dk = 1.12 * sigma_eff * Math.sqrt(Math.PI * a_m);
+      const totalN = (crackState.model && crackState.model.N_total) ? crackState.model.N_total : 25000;
+      const pct = Math.min(100, (crackState.elapsedCycles / totalN) * 100);
+
+      document.getElementById('out-crack-a').textContent = crackState.current_a.toFixed(2);
+      document.getElementById('out-crack-dk').textContent = dk.toFixed(1);
+      document.getElementById('out-crack-n').textContent = Math.floor(crackState.elapsedCycles).toLocaleString();
+      document.getElementById('out-crack-pct').textContent = pct.toFixed(0);
+    }
+
+    function drawCrackCrossSection() {
+      const w = canvasCrack.clientWidth || 600;
+      const h = 260;
+      ctxCrack.clearRect(0, 0, w, h);
+
+      const cx = w / 2;
+      const cy = h / 2 + 10;
+      const r = 90; // visual shaft radius
+
+      // Faint graph grid
+      ctxCrack.strokeStyle = 'rgba(31,35,40,0.05)';
+      ctxCrack.lineWidth = 1;
+      for (let x = 0; x < w; x += 16) {
+        ctxCrack.beginPath(); ctxCrack.moveTo(x, 0); ctxCrack.lineTo(x, h); ctxCrack.stroke();
+      }
+
+      // Outer shaft circle
+      ctxCrack.fillStyle = '#FFFFFF';
+      ctxCrack.strokeStyle = '#1F2328';
+      ctxCrack.lineWidth = 2;
+      ctxCrack.beginPath();
+      ctxCrack.arc(cx, cy, r, 0, Math.PI * 2);
+      ctxCrack.fill();
+      ctxCrack.stroke();
+
+      const m = crackState.model;
+      const d_mm = labState.d || 30;
+      const scaleMmToPx = (2 * r) / d_mm;
+
+      // Starter Notch at top
+      ctxCrack.fillStyle = '#F26B21';
+      ctxCrack.beginPath();
+      ctxCrack.moveTo(cx - 5, cy - r);
+      ctxCrack.lineTo(cx + 5, cy - r);
+      ctxCrack.lineTo(cx, cy - r + Math.max(5, crackState.a0_mm * scaleMmToPx));
+      ctxCrack.closePath();
+      ctxCrack.fill();
+
+      // Beach Marks: concentric curved arcs advancing inward from the top notch
+      ctxCrack.save();
+      ctxCrack.beginPath();
+      ctxCrack.arc(cx, cy, r, 0, Math.PI * 2);
+      ctxCrack.clip();
+
+      for (let bm of crackState.beachMarks) {
+        const arcDepth = bm * scaleMmToPx;
+        ctxCrack.strokeStyle = 'rgba(43, 92, 138, 0.65)';
+        ctxCrack.lineWidth = 1.3;
+        ctxCrack.beginPath();
+        // Clam-shell curve
+        ctxCrack.ellipse(cx, cy - r, arcDepth * 1.5, arcDepth, 0, 0, Math.PI);
+        ctxCrack.stroke();
+      }
+
+      // Fast-fracture zone if crack has reached ac
+      const isFractured = m && m.ac_m && (crackState.current_a >= m.ac_m * 1000);
+      if (isFractured) {
+        // Fast fracture stippling / hatch texture
+        ctxCrack.fillStyle = 'rgba(242, 107, 33, 0.18)';
+        ctxCrack.beginPath();
+        ctxCrack.arc(cx, cy, r, 0, Math.PI * 2);
+        ctxCrack.fill();
+
+        ctxCrack.strokeStyle = '#F26B21';
+        ctxCrack.lineWidth = 1;
+        // Hatch lines
+        for (let lx = cx - r; lx < cx + r; lx += 12) {
+          ctxCrack.beginPath();
+          ctxCrack.moveTo(lx, cy - r);
+          ctxCrack.lineTo(lx + 40, cy + r);
+          ctxCrack.stroke();
+        }
+      }
+
+      ctxCrack.restore();
+
+      // Leader-line callouts (Engineering Drawing style)
+      function drawLeader(fromX, fromY, toX, toY, text) {
+        ctxCrack.strokeStyle = '#1F2328';
+        ctxCrack.lineWidth = 1;
+        ctxCrack.beginPath();
+        ctxCrack.moveTo(fromX, fromY);
+        ctxCrack.lineTo(toX, toY);
+        ctxCrack.lineTo(toX + (toX > fromX ? 35 : -35), toY);
+        ctxCrack.stroke();
+
+        // Arrowhead at fromX, fromY
+        ctxCrack.fillStyle = '#1F2328';
+        ctxCrack.beginPath();
+        ctxCrack.arc(fromX, fromY, 2.5, 0, Math.PI * 2);
+        ctxCrack.fill();
+
+        ctxCrack.font = '700 10.5px "Barlow Condensed", sans-serif';
+        ctxCrack.fillStyle = '#1F2328';
+        ctxCrack.fillText(text, toX + (toX > fromX ? 6 : -32), toY - 3);
+      }
+
+      drawLeader(cx, cy - r + 3, cx + 90, cy - r - 12, 'ORIGIN (NOTCH)');
+      drawLeader(cx + 25, cy - r + 35, cx + 110, cy - 20, 'BEACH MARKS');
+      drawLeader(cx - 30, cy + 20, cx - 110, cy + 50, 'FAST FRACTURE');
+    }
+
+    function drawCrackChart() {
+      const w = canvasCrackChart.clientWidth || 450;
+      const h = 180;
+      ctxCrackChart.clearRect(0, 0, w, h);
+
+      const padL = 40;
+      const padR = 20;
+      const padT = 16;
+      const padB = 26;
+      const plotW = w - padL - padR;
+      const plotH = h - padT - padB;
+
+      const m = crackState.model;
+      const totalN = m ? m.N_total : 25000;
+      const ac_mm = m ? m.ac_m * 1000 : 7.0;
+
+      // Axes
+      ctxCrackChart.strokeStyle = '#1F2328';
+      ctxCrackChart.lineWidth = 1.5;
+      ctxCrackChart.beginPath();
+      ctxCrackChart.moveTo(padL, padT);
+      ctxCrackChart.lineTo(padL, padT + plotH);
+      ctxCrackChart.lineTo(padL + plotW, padT + plotH);
+      ctxCrackChart.stroke();
+
+      // Grid & Labels
+      ctxCrackChart.font = '500 9px "Overpass Mono", monospace';
+      ctxCrackChart.fillStyle = '#6B7380';
+      ctxCrackChart.fillText('a [mm]', 6, padT + 6);
+      ctxCrackChart.fillText('CYCLES N', padL + plotW - 40, padT + plotH + 20);
+
+      // Hockey stick theoretical curve
+      ctxCrackChart.strokeStyle = '#2B5C8A';
+      ctxCrackChart.lineWidth = 2;
+      ctxCrackChart.beginPath();
+
+      const denom = (m && m.denom) ? m.denom : 1.5e-3;
+      const a0_m = crackState.a0_mm / 1000;
+
+      for (let i = 0; i <= 60; i++) {
+        const frac = i / 60;
+        // From closed form: frac * N_total = (2/denom) * (a0^-0.5 - a^-0.5)
+        // a^-0.5 = a0^-0.5 - (denom / 2) * (frac * N_total)
+        const a_inv_sqrt = Math.pow(a0_m, -0.5) - (denom / 2) * (frac * totalN);
+        const a_pt_m = 1 / Math.pow(a_inv_sqrt, 2);
+        const a_pt_mm = Math.min(ac_mm, a_pt_m * 1000);
+
+        const px = padL + frac * plotW;
+        const py = padT + plotH - ((a_pt_mm - crackState.a0_mm) / Math.max(0.1, ac_mm - crackState.a0_mm)) * plotH;
+
+        if (i === 0) ctxCrackChart.moveTo(px, py);
+        else ctxCrackChart.lineTo(px, py);
+      }
+      ctxCrackChart.stroke();
+
+      // Moving Dot on Hockey Stick
+      const curFrac = Math.min(1.0, crackState.elapsedCycles / Math.max(1, totalN));
+      const curX = padL + curFrac * plotW;
+      const curY = padT + plotH - ((crackState.current_a - crackState.a0_mm) / Math.max(0.1, ac_mm - crackState.a0_mm)) * plotH;
+
+      ctxCrackChart.fillStyle = '#F26B21';
+      ctxCrackChart.strokeStyle = '#1F2328';
+      ctxCrackChart.lineWidth = 1.5;
+      ctxCrackChart.beginPath();
+      ctxCrackChart.arc(curX, curY, 5, 0, Math.PI * 2);
+      ctxCrackChart.fill();
+      ctxCrackChart.stroke();
+    }
+
+    // Step the crack propagation forward
+    function stepCrackGrowth(dt) {
+      if (!crackState.isPlaying) return;
+
+      const m = crackState.model;
+      if (!m || m.status !== 'GROWING') return;
+
+      const totalN = m.N_total;
+      const ac_mm = m.ac_m * 1000;
+      const baseDuration = 8.0; // 8 seconds to traverse full propagation
+      const speedMultiplier = crackState.speed;
+
+      crackState.elapsedCycles += (totalN / baseDuration) * dt * speedMultiplier;
+      if (crackState.elapsedCycles >= totalN) {
+        crackState.elapsedCycles = totalN;
+        crackState.current_a = ac_mm;
+        crackState.isPlaying = false;
+        document.getElementById('btn-crack-play').textContent = 'REPLAY';
+      } else {
+        // Calculate current crack depth from closed form
+        const a0_m = crackState.a0_mm / 1000;
+        const a_inv_sqrt = Math.pow(a0_m, -0.5) - (m.denom / 2) * crackState.elapsedCycles;
+        const a_m = 1 / Math.pow(a_inv_sqrt, 2);
+        crackState.current_a = a_m * 1000;
+
+        // Leave beach mark every ~8% growth
+        const lastBm = crackState.beachMarks[crackState.beachMarks.length - 1] || crackState.a0_mm;
+        if (crackState.current_a >= lastBm * 1.08) {
+          crackState.beachMarks.push(crackState.current_a);
+        }
+      }
+
+      drawCrackCrossSection();
+      drawCrackChart();
+      updateCrackReadouts();
+    }
+
+    /* ==========================================================================
+       FINDINGS BENCHMARK CONTROLLER (SHEET 05)
+       ========================================================================== */
+    function runFindingsComparison() {
+      const base = { matKey: '1045', surfKey: 'machined', notchKey: 'keyway', F: 3000, L: 0.6, d: 30, rpm: 1500 };
+      const rBase = calcShaftEngine(base);
+      const rPol = calcShaftEngine({ ...base, surfKey: 'ground' });
+      const rFil = calcShaftEngine({ ...base, notchKey: 'fillet' });
+
+      // Shot peening: Se * 1.25
+      const Se_sp = rBase.Se * 1.25;
+      const mat = MATERIALS['1045'];
+      const S1 = 0.9 * mat.Su;
+      const B_sp = Math.log10(Se_sp / S1) / 3;
+      const A_sp = S1 / Math.pow(1e3, B_sp);
+      const N_sp = Math.pow(rBase.sigma_eff / A_sp, 1 / B_sp);
+
+      const rDiam = calcShaftEngine({ ...base, d: 36 });
+      const rMat = calcShaftEngine({ ...base, matKey: '4140' });
+
+      const cases = [
+        { id: 0, N: rBase.N, isRunout: false },
+        { id: 1, N: rPol.N, isRunout: false },
+        { id: 2, N: rFil.N, isRunout: false },
+        { id: 3, N: N_sp, isRunout: false },
+        { id: 4, N: rDiam.N, isRunout: true },
+        { id: 5, N: rMat.N, isRunout: true }
+      ];
+
+      // Animate bars on log scale from 1e4 to 1e7
+      cases.forEach((item, idx) => {
+        const bar = document.getElementById(`bar-fill-${item.id}`);
+        setTimeout(() => {
+          if (item.isRunout) {
+            bar.style.width = '100%';
+          } else {
+            const logMin = 4;
+            const logMax = 6.8;
+            const pct = Math.max(10, Math.min(95, ((Math.log10(item.N) - logMin) / (logMax - logMin)) * 100));
+            bar.style.width = `${pct}%`;
+          }
+        }, idx * 180);
+      });
+
+      // Auto-generate 3 sentences directly from calculated numbers
+      const gainFillet = (rFil.N / rBase.N).toFixed(1);
+      document.getElementById('insight-1').innerHTML = `1. <strong>BEST CHEAP FIX:</strong> Smoothing the keyway from Kt 2.0 to a 1.5 fillet multiplies life by <strong>${gainFillet}x</strong> at almost zero extra manufacturing cost.`;
+      document.getElementById('insight-2').innerHTML = `2. <strong>BIGGEST OVERALL GAIN:</strong> A modest 20% increase in diameter drops nominal bending stress by <strong>42%</strong>, shifting the shaft past the endurance limit into <strong>RUNOUT</strong>.`;
+      document.getElementById('insight-3').innerHTML = `3. <strong>RUNOUT ACHIEVED:</strong> Both a 20% diameter increase and upgrading to AISI 4140 alloy steel eliminate fatigue failure completely by achieving runout.`;
+    }
+
+    /* ==========================================================================
+       UI HELPERS & EVENT LISTENERS
+       ========================================================================== */
+    // Paperclip interactive widget
+    let clipBends = 0;
+    let clipSnapLimit = Math.floor(8 + Math.random() * 8); // random between 8 and 15
+    const btnBendClip = document.getElementById('btn-bend-clip');
+    const btnResetClip = document.getElementById('btn-reset-clip');
+    const clipMsg = document.getElementById('clip-msg');
+    const clipUnbroken = document.getElementById('clip-unbroken');
+    const clipBroken = document.getElementById('clip-broken');
+    const clipWireMoving = document.getElementById('clip-wire-moving');
+    const clipHinge = document.getElementById('clip-hinge');
+
+    btnBendClip.addEventListener('click', () => {
+      if (clipBends >= clipSnapLimit) return;
+      clipBends++;
+
+      const isAlternate = clipBends % 2 === 1;
+      const angle = isAlternate ? 18 : -18;
+      clipWireMoving.setAttribute('transform', `rotate(${angle} 120 55)`);
+      clipHinge.setAttribute('r', String(3 + clipBends * 0.4));
+
+      const integrity = Math.max(0, Math.floor(100 - (clipBends / clipSnapLimit) * 100));
+
+      if (clipBends >= clipSnapLimit) {
+        clipUnbroken.style.display = 'none';
+        clipBroken.style.display = 'block';
+        clipMsg.innerHTML = `<span style="color:var(--fail-red);font-weight:700;">SNAPPED at bend ${clipBends}!</span> Hinge integrity: 0%`;
+        btnBendClip.disabled = true;
+      } else {
+        clipMsg.innerHTML = `Bends: <strong>${clipBends}</strong> / ~${clipSnapLimit} | Hinge integrity: ${integrity}%`;
+      }
+    });
+
+    btnResetClip.addEventListener('click', () => {
+      clipBends = 0;
+      clipSnapLimit = Math.floor(8 + Math.random() * 8);
+      clipUnbroken.style.display = 'block';
+      clipBroken.style.display = 'none';
+      clipWireMoving.removeAttribute('transform');
+      clipHinge.setAttribute('r', '4');
+      clipMsg.innerHTML = 'Bends: <strong>0</strong> | Hinge integrity: 100%';
+      btnBendClip.disabled = false;
+    });
+
+    // Factor chips scroll and highlight
+    document.querySelectorAll('.factor-tag').forEach(tag => {
+      function highlightTarget() {
+        const targetId = tag.getAttribute('data-target');
+        const targetEl = document.getElementById(targetId);
+        if (targetEl) {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          targetEl.classList.add('control-highlighted');
+          setTimeout(() => {
+            targetEl.classList.remove('control-highlighted');
+          }, 1500);
+        }
+      }
+      tag.addEventListener('click', highlightTarget);
+      tag.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          highlightTarget();
+        }
+      });
+    });
+
+    // Popover '?' hint buttons
+    let activePopover = null;
+
+    document.querySelectorAll('.hint-btn').forEach(btn => {
+      const hintText = btn.getAttribute('data-hint');
+      const popover = document.createElement('div');
+      popover.className = 'popover-box';
+      popover.textContent = hintText;
+      btn.parentElement.appendChild(popover);
+
+      function togglePopover(e) {
+        e.stopPropagation();
+        if (activePopover && activePopover !== popover) {
+          activePopover.classList.remove('visible');
+        }
+        popover.classList.toggle('visible');
+        activePopover = popover.classList.contains('visible') ? popover : null;
+      }
+
+      btn.addEventListener('click', togglePopover);
+      btn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          togglePopover(e);
+        }
+      });
+    });
+
+    // Close popovers on outside click or Esc
+    document.addEventListener('click', () => {
+      if (activePopover) {
+        activePopover.classList.remove('visible');
+        activePopover = null;
+      }
+    });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && activePopover) {
+        activePopover.classList.remove('visible');
+        activePopover = null;
+      }
+    });
+
+    // Lab Controls Event Listeners
+    document.getElementById('select-preset').addEventListener('change', (e) => {
+      const pKey = e.target.value;
+      if (PRESETS[pKey]) {
+        const p = PRESETS[pKey];
+        labState.F = p.F;
+        labState.L = p.L;
+        labState.d = p.d;
+        labState.matKey = p.matKey;
+        labState.surfKey = p.surfKey;
+        labState.notchKey = p.notchKey;
+        labState.rpm = p.rpm;
+
+        document.getElementById('slider-load').value = p.F;
+        document.getElementById('slider-len').value = p.L;
+        document.getElementById('slider-dia').value = p.d;
+        document.getElementById('slider-rpm').value = p.rpm;
+        document.getElementById('select-material').value = p.matKey;
+        document.getElementById('select-surface').value = p.surfKey;
+        document.getElementById('select-notch').value = p.notchKey;
+
+        document.getElementById('val-load').textContent = `${p.F} N`;
+        document.getElementById('val-len').textContent = `${p.L.toFixed(2)} m`;
+        document.getElementById('val-dia').textContent = `${p.d} mm`;
+        document.getElementById('val-rpm').textContent = `${p.rpm} RPM`;
+        document.getElementById('val-preset').textContent = p.name;
+
+        resetLabState();
+      }
+    });
+
+    document.getElementById('select-material').addEventListener('change', (e) => {
+      labState.matKey = e.target.value;
+      document.getElementById('select-preset').value = 'custom';
+      document.getElementById('val-preset').textContent = 'Custom';
+      updateLabCalculations();
+    });
+
+    document.getElementById('select-surface').addEventListener('change', (e) => {
+      labState.surfKey = e.target.value;
+      document.getElementById('select-preset').value = 'custom';
+      document.getElementById('val-preset').textContent = 'Custom';
+      updateLabCalculations();
+    });
+
+    document.getElementById('select-notch').addEventListener('change', (e) => {
+      labState.notchKey = e.target.value;
+      document.getElementById('select-preset').value = 'custom';
+      document.getElementById('val-preset').textContent = 'Custom';
+      updateLabCalculations();
+    });
+
+    document.getElementById('slider-load').addEventListener('input', (e) => {
+      labState.F = Number(e.target.value);
+      document.getElementById('val-load').textContent = `${labState.F} N`;
+      document.getElementById('select-preset').value = 'custom';
+      document.getElementById('val-preset').textContent = 'Custom';
+      updateLabCalculations();
+    });
+
+    document.getElementById('slider-len').addEventListener('input', (e) => {
+      labState.L = Number(e.target.value);
+      document.getElementById('val-len').textContent = `${labState.L.toFixed(2)} m`;
+      document.getElementById('select-preset').value = 'custom';
+      document.getElementById('val-preset').textContent = 'Custom';
+      updateLabCalculations();
+    });
+
+    document.getElementById('slider-dia').addEventListener('input', (e) => {
+      labState.d = Number(e.target.value);
+      document.getElementById('val-dia').textContent = `${labState.d} mm`;
+      document.getElementById('select-preset').value = 'custom';
+      document.getElementById('val-preset').textContent = 'Custom';
+      updateLabCalculations();
+    });
+
+    document.getElementById('slider-rpm').addEventListener('input', (e) => {
+      labState.rpm = Number(e.target.value);
+      document.getElementById('val-rpm').textContent = `${labState.rpm} RPM`;
+      updateLabCalculations();
+    });
+
+    btnRunPause.addEventListener('click', () => {
+      labState.isRunning = !labState.isRunning;
+      btnRunPause.textContent = labState.isRunning ? 'PAUSE' : 'RUN';
+    });
+
+    btnRunFailure.addEventListener('click', triggerRunToFailure);
+    document.getElementById('btn-reset-lab').addEventListener('click', resetLabState);
+
+    // Crack controls
+    document.getElementById('slider-a0').addEventListener('input', (e) => {
+      crackState.a0_mm = Number(e.target.value);
+      document.getElementById('val-a0').textContent = `${crackState.a0_mm.toFixed(2)} mm`;
+      updateCrackParameters();
+    });
+
+    const btnCrackPlay = document.getElementById('btn-crack-play');
+    btnCrackPlay.addEventListener('click', () => {
+      crackState.isPlaying = !crackState.isPlaying;
+      btnCrackPlay.textContent = crackState.isPlaying ? 'PAUSE' : 'PLAY';
+    });
+
+    document.getElementById('btn-crack-reset').addEventListener('click', () => {
+      crackState.isPlaying = false;
+      btnCrackPlay.textContent = 'PLAY';
+      updateCrackParameters();
+    });
+
+    const btnCrackSpeed = document.getElementById('btn-crack-speed');
+    btnCrackSpeed.addEventListener('click', () => {
+      crackState.speed = crackState.speed === 1 ? 4 : 1;
+      btnCrackSpeed.textContent = `SPEED: ${crackState.speed}x`;
+    });
+
+    // Findings button
+    document.getElementById('btn-run-comparison').addEventListener('click', runFindingsComparison);
+
+    // Crack loop timer
+    let lastCrackTime = performance.now();
+    function crackAnimationLoop(t) {
+      const dt = Math.min(0.1, (t - lastCrackTime) / 1000);
+      lastCrackTime = t;
+      stepCrackGrowth(dt);
+      requestAnimationFrame(crackAnimationLoop);
+    }
+
+    // IntersectionObserver to pause simulations when offscreen
+    const labPanelEl = document.getElementById('lab-main-panel');
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        isLabInView = entry.isIntersecting;
+      });
+    }, { threshold: 0.1 });
+    observer.observe(labPanelEl);
+
+    // Active Navigation link on scroll
+    const sections = document.querySelectorAll('section.sheet');
+    const navLinks = document.querySelectorAll('.nav-link');
+
+    window.addEventListener('scroll', () => {
+      let currentId = '';
+      sections.forEach(sec => {
+        const top = sec.offsetTop - 120;
+        if (window.scrollY >= top) {
+          currentId = sec.getAttribute('id');
+        }
+      });
+      navLinks.forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === `#${currentId}`);
+      });
+    }, { passive: true });
+
+    // Handle responsive window resize
+    window.addEventListener('resize', () => {
+      initCanvases();
+      updateLabCalculations();
+      drawCrackCrossSection();
+      drawCrackChart();
+    });
+
+    // INITIALIZATION
+    window.addEventListener('DOMContentLoaded', () => {
+      initCanvases();
+      // Set initial Gearbox preset values
+      document.getElementById('select-preset').value = 'gearbox';
+      const p = PRESETS['gearbox'];
+      labState.F = p.F;
+      labState.L = p.L;
+      labState.d = p.d;
+      labState.matKey = p.matKey;
+      labState.surfKey = p.surfKey;
+      labState.notchKey = p.notchKey;
+      labState.rpm = p.rpm;
+
+      document.getElementById('slider-load').value = p.F;
+      document.getElementById('slider-len').value = p.L;
+      document.getElementById('slider-dia').value = p.d;
+      document.getElementById('slider-rpm').value = p.rpm;
+      document.getElementById('select-material').value = p.matKey;
+      document.getElementById('select-surface').value = p.surfKey;
+      document.getElementById('select-notch').value = p.notchKey;
+
+      document.getElementById('val-load').textContent = `${p.F} N`;
+      document.getElementById('val-len').textContent = `${p.L.toFixed(2)} m`;
+      document.getElementById('val-dia').textContent = `${p.d} mm`;
+      document.getElementById('val-rpm').textContent = `${p.rpm} RPM`;
+      document.getElementById('val-preset').textContent = p.name;
+
+      updateLabCalculations();
+      updateCrackParameters();
+      runFindingsComparison();
+
+      // Start animation loops
+      requestAnimationFrame(mainAnimationLoop);
+      requestAnimationFrame(crackAnimationLoop);
+    });
+  </script>
+</body>
+</html>
